@@ -1,5 +1,6 @@
-from ast import *
-from visitor import ASTVisitor
+from redux.ast import *
+from redux.visitor import ASTVisitor
+from redux.intrinsics import *
 
 
 class CallInliner(ASTVisitor):

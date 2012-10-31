@@ -1,6 +1,6 @@
 from ply import yacc
-from lexer import lexer, tokens
-from ast import *
+from redux.lexer import lexer, tokens
+from redux.ast import *
 
 
 def report_syntax_error(lineno, message):

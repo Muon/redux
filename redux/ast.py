@@ -1,4 +1,4 @@
-from autorepr import AutoRepr
+from redux.autorepr import AutoRepr
 
 
 class ASTNode(AutoRepr):

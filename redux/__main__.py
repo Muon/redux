@@ -1,4 +1,4 @@
-from codegenerator import compile_script
+from redux.codegenerator import compile_script
 from argparse import ArgumentParser
 from os.path import splitext
 
