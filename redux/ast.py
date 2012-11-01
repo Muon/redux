@@ -1,7 +1,8 @@
 from redux.autorepr import AutoRepr
+from redux.structeq import StructEq
 
 
-class ASTNode(AutoRepr):
+class ASTNode(AutoRepr, StructEq):
     pass
 
 

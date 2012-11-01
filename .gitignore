@@ -2,3 +2,5 @@ __pycache__
 parser.out
 parsetab.py
 *.sublime-workspace
+.coverage
+*.pyc
