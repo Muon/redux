@@ -4,7 +4,8 @@ from redux.ast import *
 
 
 def report_syntax_error(lineno, message):
-    sys.stderr.write("%s:%d: %s\n" % (filename, lineno, message))
+    global errors
+    errors.append("%d: %s" % (lineno, message))
 
 
 def p_block(p):
@@ -48,12 +49,12 @@ def p_assignment(p):
 
 def p_assignment_error(p):
     "assignment : variable ASSIGN error"
-    report_syntax_error(p.lineno(-1), "expected expression after start of assignment")
+    report_syntax_error(p.lineno(3), "expected expression after start of assignment")
 
 
 def p_stray_variable_err(p):
     "stmt : variable error"
-    report_syntax_error(p.lineno(-1), "stray identifier '%s'" % p[1].name)
+    report_syntax_error(p.lineno(1), "stray identifier '%s'" % p[1].name)
 
 
 def p_code_literal(p):
@@ -253,9 +254,13 @@ def p_error(p):
 
     if p is None:
         report_syntax_error(lineno, "premature end-of-file encountered")
+    else:
+        report_syntax_error(lineno, "syntax error")
 
 parser = yacc.yacc()
 
 
 def parse(code):
-    return parser.parse(code, lexer=lexer)
+    global errors
+    errors = []
+    return parser.parse(code, lexer=lexer), errors

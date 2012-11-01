@@ -3,6 +3,7 @@ from redux.visitor import ASTVisitor
 from redux.callinliner import CallInliner
 from redux.ast import *
 from redux.intrinsics import *
+import sys
 
 
 class UndefinedVariableError(RuntimeError):
@@ -204,7 +205,11 @@ class CodeGenerator(ASTVisitor):
         self.emit("break;\n")
 
 
-def compile_script(code):
+def compile_script(filename, code):
     code_generator = CodeGenerator()
-    code_generator.visit(CallInliner().visit(parse(code)))
+    ast_, errors = parse(code)
+    for error in errors:
+        sys.stderr.write("%s:%s\n" % (filename, error))
+
+    code_generator.visit(CallInliner().visit(ast_))
     return code_generator.code

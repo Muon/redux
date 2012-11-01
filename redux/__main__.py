@@ -14,4 +14,4 @@ for filename in args.filenames:
 
     base_filename, extension = splitext(filename)
     with open(base_filename + ".ais", "wt") as file_:
-        file_.write(compile_script(input_code))
+        file_.write(compile_script(filename, input_code))
