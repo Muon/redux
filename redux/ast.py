@@ -1,3 +1,4 @@
+import codecs
 from redux.autorepr import AutoRepr
 from redux.structeq import StructEq
 

@@ -9,6 +9,7 @@ def test_code_generation():
         ("def f(a) return a end x = f(1)", "int __retval0 = 0;\n{\nint a = 1;\n__retval0 = a;\n}\nint x = __retval0;"),
         ("say(1, 2)", "say 1, 2;"),
         ("sqrt(2)", "(|/2);"),
+        ("a = \"foo\" say(a)", "say \"foo\";")
     ]
 
     for redux_code, rescript_code in code_examples:
