@@ -1,6 +1,9 @@
-from redux.parser import parse
 from nose.tools import eq_
-from redux.ast import *
+from redux.ast import (Block, Assignment, WhileStmt, IfStmt, FunctionCall,
+                       BreakStmt, ReturnStmt, CodeLiteral, BitfieldDefinition,
+                       FunctionDefinition, Constant, VarRef, AddOp, EqualToOp,
+                       GreaterThanOp, LogicalNotOp)
+from redux.parser import parse
 
 
 def test_valid_parses():

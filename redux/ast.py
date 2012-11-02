@@ -66,6 +66,7 @@ class BitfieldDefinition(ASTNode):
         self.name = name
         self.members = members
 
+
 class Constant(ASTNode):
     def __init__(self, value):
         self.value = value

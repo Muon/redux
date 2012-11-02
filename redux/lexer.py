@@ -2,109 +2,121 @@ from ply import lex
 import codecs
 import sys
 
-reserved = {
-    "if": "IF",
-    "elif": "ELIF",
-    "else": "ELSE",
-    "while": "WHILE",
-    "end": "END",
-    "and": "LAND",
-    "or": "LOR",
-    "not": "LNOT",
-    "def": "DEF",
-    "return": "RETURN",
-    "break": "BREAK",
-    "bitfield": "BITFIELD"
-}
 
-tokens = (
-    'ID',
-    'LPAREN',
-    'RPAREN',
-    'COMMA',
-    'PLUS',
-    'MINUS',
-    'TIMES',
-    'DIVIDE',
-    'LT',
-    'GT',
-    'LTE',
-    'GTE',
-    'EQ',
-    'NEQ',
-    'COLON',
-    'NUMBER',
-    'STRING',
-    'ASSIGN',
-    'CODELITERAL',
-) + tuple(reserved.values())
-
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
-t_COMMA = r','
-t_PLUS = r'\+'
-t_MINUS = r'-'
-t_TIMES = r'\*'
-t_DIVIDE = r'\/'
-t_LT = r'<'
-t_GT = r'>'
-t_LTE = r'<='
-t_GTE = r'>='
-t_EQ = r'=='
-t_NEQ = r'!='
-t_ASSIGN = r'='
-t_COLON = r':'
-
-t_ignore_COMMENT = r'\#.*'
+class Lexer(object):
+    def __init__(self, **kwargs):
+        self._lexer = lex.lex(module=self, **kwargs)
 
 
-def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = reserved.get(t.value, 'ID')    # Check for reserved words
-    return t
+    def input(self, data):
+        self._lexer.input(data)
 
 
-def t_NUMBER(t):
-    r"""
-    [-+]? # optional sign
-    (?:
-     (?: \d* \. \d+ ) # .1 .12 .123 etc 9.1 etc 98.1 etc
-     |
-     (?: \d+ \.? ) # 1. 12. 123. etc 1 12 123 etc
-    )
-    # followed by optional exponent part if desired
-    (?: [Ee] [+-]? \d+ ) ?
-    """
-    try:
-        t.value = int(t.value)
-    except ValueError:
-        t.value = float(t.value)
-
-    return t
+    def token(self):
+        return self._lexer.token()
 
 
-def t_STRING(t):
-    r'"([^\\"]*(?:\\.[^\\"]*)*)"'
+    reserved = {
+        "if": "IF",
+        "elif": "ELIF",
+        "else": "ELSE",
+        "while": "WHILE",
+        "end": "END",
+        "and": "LAND",
+        "or": "LOR",
+        "not": "LNOT",
+        "def": "DEF",
+        "return": "RETURN",
+        "break": "BREAK",
+        "bitfield": "BITFIELD"
+    }
 
-    t.value = codecs.getdecoder("unicode_escape")(t.value[1:-1])[0]
-    return t
+    tokens = (
+        'ID',
+        'LPAREN',
+        'RPAREN',
+        'COMMA',
+        'PLUS',
+        'MINUS',
+        'TIMES',
+        'DIVIDE',
+        'LT',
+        'GT',
+        'LTE',
+        'GTE',
+        'EQ',
+        'NEQ',
+        'COLON',
+        'NUMBER',
+        'STRING',
+        'ASSIGN',
+        'CODELITERAL',
+    ) + tuple(reserved.values())
+
+    t_LPAREN = r'\('
+    t_RPAREN = r'\)'
+    t_COMMA = r','
+    t_PLUS = r'\+'
+    t_MINUS = r'-'
+    t_TIMES = r'\*'
+    t_DIVIDE = r'\/'
+    t_LT = r'<'
+    t_GT = r'>'
+    t_LTE = r'<='
+    t_GTE = r'>='
+    t_EQ = r'=='
+    t_NEQ = r'!='
+    t_ASSIGN = r'='
+    t_COLON = r':'
+
+    t_ignore_COMMENT = r'\#.*'
 
 
-def t_CODELITERAL(t):
-    r'`.+?`'
-    t.value = t.value[1:-1]
-    return t
+    def t_ID(self, t):
+        r'[a-zA-Z_][a-zA-Z_0-9]*'
+        t.type = self.__class__.reserved.get(t.value, 'ID') # Check for reserved words
+        return t
 
 
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += len(t.value)
+    def t_NUMBER(self, t):
+        r"""
+        [-+]? # optional sign
+        (?:
+         (?: \d* \. \d+ ) # .1 .12 .123 etc 9.1 etc 98.1 etc
+         |
+         (?: \d+ \.? ) # 1. 12. 123. etc 1 12 123 etc
+        )
+        # followed by optional exponent part if desired
+        (?: [Ee] [+-]? \d+ ) ?
+        """
+        try:
+            t.value = int(t.value)
+        except ValueError:
+            t.value = float(t.value)
+
+        return t
 
 
-def t_error(t):
-    sys.stderr.write("%s:%d: invalid token %r\n" % (filename, t.lineno, t.value))
-    t.lexer.skip(1)
+    def t_STRING(self, t):
+        r'"([^\\"]*(?:\\.[^\\"]*)*)"'
 
-t_ignore = " \t"
+        t.value = codecs.getdecoder("unicode_escape")(t.value[1:-1])[0]
+        return t
 
-lexer = lex.lex()
+
+    def t_CODELITERAL(self, t):
+        r'`.+?`'
+        t.value = t.value[1:-1]
+        return t
+
+
+    def t_newline(self, t):
+        r'\n+'
+        t.lexer.lineno += len(t.value)
+
+
+    def t_error(self, t):
+        sys.stderr.write("%d: invalid token %r\n" % (t.lineno, t.value))
+        t.lexer.skip(1)
+
+    t_ignore = " \t"
