@@ -180,6 +180,9 @@ class CodeGenerator(ASTVisitor):
 
         for statement in block.statements:
             self.visit(statement)
+            if isinstance(statement, FunctionCall):
+                if not self.intrinsics[statement.function].nontrivial:
+                    self.emit(";\n")
 
         self.pop_scope()
 

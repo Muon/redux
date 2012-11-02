@@ -16,7 +16,6 @@ class SayFunction(IntrinsicFunction):
         for arg in args[1:]:
             code_generator.emit(", ")
             code_generator.visit(arg)
-        code_generator.emit(";\n")
 
     def type(self, code_generator, args):
         return None
