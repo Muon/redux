@@ -4,3 +4,4 @@ parsetab.py
 *.sublime-workspace
 .coverage
 *.pyc
+.ropeproject
