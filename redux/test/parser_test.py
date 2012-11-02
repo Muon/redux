@@ -20,6 +20,7 @@ def test_valid_parses():
         ("def f(a, b) end", Block([FunctionDefinition("f", ["a", "b"], Block([]))])),
         ("a = (b)", Block([Assignment(VarRef("a"), VarRef("b"))])),
         ("bitfield A x : 8 y : 8 end", Block([BitfieldDefinition("A", [("x", 8), ("y", 8)])])),
+        ("a = not a", Block([Assignment(VarRef("a"), LogicalNotOp(VarRef("a")))])),
     ]
 
     for code, ast_ in valid_parses:
