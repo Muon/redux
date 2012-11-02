@@ -208,8 +208,8 @@ class CodeGenerator(ASTVisitor):
 def compile_script(filename, code):
     code_generator = CodeGenerator()
     ast_, errors = parse(code)
-    for error in errors:
-        sys.stderr.write("%s:%s\n" % (filename, error))
+    for lineno, message in errors:
+        sys.stderr.write("%s:%d: %s\n" % (filename, lineno, message))
 
     code_generator.visit(CallInliner().visit(ast_))
     return code_generator.code

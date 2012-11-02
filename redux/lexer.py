@@ -1,11 +1,11 @@
-from ply import lex
 import codecs
-import sys
+from ply import lex
 
 
 class Lexer(object):
     def __init__(self, **kwargs):
         self._lexer = lex.lex(module=self, **kwargs)
+        self.errors = []
 
 
     def input(self, data):
@@ -116,7 +116,7 @@ class Lexer(object):
 
 
     def t_error(self, t):
-        sys.stderr.write("%d: invalid token %r\n" % (t.lineno, t.value))
+        self.errors.append((t.lineno, "invalid token %r" % t.value))
         t.lexer.skip(1)
 
     t_ignore = " \t"

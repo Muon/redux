@@ -1,5 +1,4 @@
 class StructEq(object):
-
     """A simple mixin that defines equality based on the objects attributes.
 
     This class is especially useful if you're in a situation where one object

@@ -8,11 +8,6 @@ from redux.ast import (Block, Assignment, WhileStmt, IfStmt, FunctionCall,
 from redux.lexer import Lexer
 
 
-def report_syntax_error(lineno, message):
-    global errors
-    errors.append("%d: %s" % (lineno, message))
-
-
 class Parser(object):
     tokens = Lexer.tokens
 
@@ -21,9 +16,12 @@ class Parser(object):
 
 
     def parse(self, code):
-        global errors
-        errors = []
-        return self._parser.parse(code, lexer=Lexer()), errors
+        self.errors = []
+        return self._parser.parse(code, lexer=Lexer()), self.errors
+
+
+    def error(self, lineno, message):
+        self.errors.append((lineno, message))
 
 
     def p_block(self, p):
@@ -67,12 +65,12 @@ class Parser(object):
 
     def p_assignment_error(self, p):
         "assignment : variable ASSIGN error"
-        report_syntax_error(p.lineno(3), "expected expression after start of assignment")
+        self.error(p.lineno(3), "expected expression after start of assignment")
 
 
     def p_stray_variable_err(self, p):
         "stmt : variable error"
-        report_syntax_error(p.lineno(1), "stray identifier '%s'" % p[1].name)
+        self.error(p.lineno(1), "stray identifier '%s'" % p[1].name)
 
 
     def p_code_literal(self, p):
@@ -201,7 +199,7 @@ class Parser(object):
 
     def p_arg_list_missing_comma_err(self, p):
         "arg_list : arg_list error expression"
-        report_syntax_error(p.lineno(2), "expected ',' after argument %d" % len(p[1]))
+        self.error(p.lineno(2), "expected ',' after argument %d" % len(p[1]))
 
 
     def p_id_list_empty(self, p):
@@ -246,9 +244,9 @@ class Parser(object):
             lineno = p.lineno
 
         if p is None:
-            report_syntax_error(lineno, "premature end-of-file encountered")
+            self.error(lineno, "premature end-of-file encountered")
         else:
-            report_syntax_error(lineno, "syntax error")
+            self.error(lineno, "syntax error")
 
 
 
