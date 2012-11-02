@@ -1,9 +1,9 @@
+import sys
+from redux.ast import FunctionCall, Constant, VarRef, BinaryOp
+from redux.callinliner import CallInliner
+from redux.intrinsics import SayFunction, SqrtFunction
 from redux.parser import parse
 from redux.visitor import ASTVisitor
-from redux.callinliner import CallInliner
-from redux.ast import *
-from redux.intrinsics import *
-import sys
 
 
 class UndefinedVariableError(RuntimeError):

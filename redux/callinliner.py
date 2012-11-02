@@ -1,6 +1,7 @@
-from redux.ast import *
+from redux.ast import (Block, Assignment, WhileStmt, IfStmt, BreakStmt,
+                       ReturnStmt, Constant, VarRef)
+from redux.intrinsics import IntrinsicFunction
 from redux.visitor import ASTVisitor
-from redux.intrinsics import *
 
 
 class CallInliner(ASTVisitor):
