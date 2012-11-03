@@ -61,7 +61,7 @@ class CodeGenerator(ASTVisitor):
         if a_type is b_type:
             return a_type
 
-        if a is float or b is float:
+        if a_type is float or b_type is float:
             return float
 
         raise RuntimeError("no common type for %s and %s (%r and %r)" % (a_type, b_type, a, b))
