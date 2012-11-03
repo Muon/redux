@@ -93,7 +93,7 @@ class CallInliner(ASTVisitor):
                                     len(function.arguments)))
 
             overrides = [Assignment(VarRef(a), b) for a, b in zip(function.arguments,
-                                                          func_call.arguments)]
+                                                                  func_call.arguments)]
             new_block = Block(function.block.statements[:], overrides)
 
             return_var = None

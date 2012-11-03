@@ -67,7 +67,6 @@ class BitfieldDefinition(ASTNode):
         self.name = name
         self.members = members
 
-
     def get_member_limits(self, member):
         total_length = 0
         for name, length in self.members:
@@ -122,8 +121,10 @@ class MulOp(BinaryOp):
 class DivOp(BinaryOp):
     pass
 
+
 class RelationalOp(ASTNode):
     pass
+
 
 class LessThanOp(BinaryOp, RelationalOp):
     pass

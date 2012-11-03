@@ -7,14 +7,11 @@ class Lexer(object):
         self._lexer = lex.lex(module=self, **kwargs)
         self.errors = []
 
-
     def input(self, data):
         self._lexer.input(data)
 
-
     def token(self):
         return self._lexer.token()
-
 
     reserved = {
         "if": "IF",
@@ -30,7 +27,6 @@ class Lexer(object):
         "break": "BREAK",
         "bitfield": "BITFIELD"
     }
-
     tokens = (
         'ID',
         'LPAREN',
@@ -53,7 +49,6 @@ class Lexer(object):
         'ASSIGN',
         'CODELITERAL',
     ) + tuple(reserved.values())
-
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
     t_COMMA = r','
@@ -73,12 +68,11 @@ class Lexer(object):
 
     t_ignore_COMMENT = r'\#.*'
 
-
     def t_ID(self, t):
         r'[a-zA-Z_][a-zA-Z_0-9]*'
-        t.type = self.__class__.reserved.get(t.value, 'ID') # Check for reserved words
+        # See http://www.dabeaz.com/ply/ply.html#ply_nn6
+        t.type = self.__class__.reserved.get(t.value, 'ID')
         return t
-
 
     def t_NUMBER(self, t):
         r"""
@@ -95,27 +89,21 @@ class Lexer(object):
             t.value = int(t.value)
         except ValueError:
             t.value = float(t.value)
-
         return t
-
 
     def t_STRING(self, t):
         r'"([^\\"]*(?:\\.[^\\"]*)*)"'
-
         t.value = codecs.getdecoder("unicode_escape")(t.value[1:-1])[0]
         return t
-
 
     def t_CODELITERAL(self, t):
         r'`.+?`'
         t.value = t.value[1:-1]
         return t
 
-
     def t_newline(self, t):
         r'\n+'
         t.lexer.lineno += len(t.value)
-
 
     def t_error(self, t):
         self.errors.append((t.lineno, "invalid token %r" % t.value))

@@ -58,7 +58,6 @@ class CodeGenerator(ASTVisitor):
 
         raise KeyError(name)
 
-
     def is_name_defined(self, name):
         try:
             self.get_variable_type(name)
