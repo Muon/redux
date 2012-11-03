@@ -8,6 +8,7 @@ def test_code_generation():
         ("def f(a) return a end x = f(1)", "int __retval0 = 0;\n{\nint a = 1;\n__retval0 = a;\n}\nint x = __retval0;"),
         ("say(1, 2)", "say 1, 2;"),
         ("sqrt(2)", "(|/2);"),
+        ("a = sqrt(2)", "float a = (|/2);"),
         ("a = \"foo\" say(a)", "say \"foo\";"),
         ("a = 1 - 1", "int a = (1-1);"),
         ("a = 1 + 1", "int a = (1+1);"),
@@ -23,6 +24,7 @@ def test_code_generation():
         ("a = 1 or 1", "int a = (1||1);"),
         ("a = not 1", "int a = (!1);"),
         ("a = 1.0 b = 1 + a", "float a = 1.0;\nfloat b = (1+a);"),
+        ("a = 1 b = 1.0 a = b", "int a = 1;\nfloat b = 1.0;\na = b;"),
     ]
 
     for redux_code, rescript_code in code_examples:
