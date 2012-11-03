@@ -1,5 +1,5 @@
 import sys
-from redux.ast import FunctionCall, Constant, VarRef, BinaryOp
+from redux.ast import FunctionCall, Constant, VarRef, BinaryOp, RelationalOp
 from redux.callinliner import CallInliner
 from redux.intrinsics import SayFunction, SqrtFunction
 from redux.parser import parse
@@ -69,6 +69,9 @@ class CodeGenerator(ASTVisitor):
     def expression_type(self, expression):
         if isinstance(expression, Constant):
             return type(expression.value)
+
+        if isinstance(expression, RelationalOp):
+            return int
 
         if isinstance(expression, BinaryOp):
             return self.common_type(expression.lhs, expression.rhs)

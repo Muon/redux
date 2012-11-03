@@ -21,6 +21,7 @@ def test_code_generation():
         ("a = 1 != 1", "int a = (1!=1);"),
         ("a = 1 and 1", "int a = (1&&1);"),
         ("a = 1 or 1", "int a = (1||1);"),
+        ("a = not 1", "int a = (!1);"),
     ]
 
     for redux_code, rescript_code in code_examples:

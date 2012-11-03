@@ -105,39 +105,41 @@ class MulOp(BinaryOp):
 class DivOp(BinaryOp):
     pass
 
+class RelationalOp(ASTNode):
+    pass
 
-class LessThanOp(BinaryOp):
+class LessThanOp(BinaryOp, RelationalOp):
     pass
 
 
-class GreaterThanOp(BinaryOp):
+class GreaterThanOp(BinaryOp, RelationalOp):
     pass
 
 
-class LessThanOrEqualToOp(BinaryOp):
+class LessThanOrEqualToOp(BinaryOp, RelationalOp):
     pass
 
 
-class GreaterThanOrEqualToOp(BinaryOp):
+class GreaterThanOrEqualToOp(BinaryOp, RelationalOp):
     pass
 
 
-class EqualToOp(BinaryOp):
+class EqualToOp(BinaryOp, RelationalOp):
     pass
 
 
-class NotEqualToOp(BinaryOp):
+class NotEqualToOp(BinaryOp, RelationalOp):
     pass
 
 
-class LogicalAndOp(BinaryOp):
+class LogicalAndOp(BinaryOp, RelationalOp):
     pass
 
 
-class LogicalOrOp(BinaryOp):
+class LogicalOrOp(BinaryOp, RelationalOp):
     pass
 
 
-class LogicalNotOp(ASTNode):
+class LogicalNotOp(RelationalOp):
     def __init__(self, expression):
         self.expression = expression
