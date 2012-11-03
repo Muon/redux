@@ -9,6 +9,7 @@ def test_code_generation():
         ("say(1, 2)", "say 1, 2;"),
         ("sqrt(2)", "(|/2);"),
         ("a = sqrt(2)", "float a = (|/2);"),
+        ("`PERFORM RAND;` a = perf_ret", "PERFORM RAND;int a = perf_ret;"),
         ("a = \"foo\" say(a)", "say \"foo\";"),
         ("a = 1 - 1", "int a = (1-1);"),
         ("a = 1 + 1", "int a = (1+1);"),
