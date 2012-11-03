@@ -1,5 +1,6 @@
 import sys
-from redux.ast import FunctionCall, Constant, VarRef, BinaryOp, RelationalOp
+from redux.ast import (FunctionCall, Constant, VarRef, BinaryOp, RelationalOp,
+                       BitfieldDefinition, BitfieldAccess)
 from redux.callinliner import CallInliner
 from redux.intrinsics import SayFunction, SqrtFunction
 from redux.parser import parse
@@ -16,6 +17,7 @@ class CodeGenerator(ASTVisitor):
         super(CodeGenerator, self).__init__()
         self.local_scopes = [{"perf_ret": int, "perf_ret_float": float}]
         self.strings = []
+        self.bitfield_definitions = []
         self.intrinsics = {"say": SayFunction(), "sqrt": SqrtFunction()}
 
         self.code = ""
@@ -27,8 +29,10 @@ class CodeGenerator(ASTVisitor):
         self.emit("{\n")
         self.local_scopes.append({})
         self.strings.append({})
+        self.bitfield_definitions.append({})
 
     def pop_scope(self):
+        self.bitfield_definitions.pop()
         self.strings.pop()
         self.local_scopes.pop()
         self.emit("}\n")
@@ -46,6 +50,14 @@ class CodeGenerator(ASTVisitor):
                 return scope[name]
 
         assert False
+
+    def get_bitfield_definition_by_name(self, name):
+        for scope in reversed(self.bitfield_definitions):
+            if name in scope:
+                return scope[name]
+
+        raise KeyError(name)
+
 
     def is_name_defined(self, name):
         try:
@@ -70,6 +82,9 @@ class CodeGenerator(ASTVisitor):
         if isinstance(expression, Constant):
             return type(expression.value)
 
+        if isinstance(expression, BitfieldAccess):
+            return int
+
         if isinstance(expression, RelationalOp):
             return int
 
@@ -80,7 +95,10 @@ class CodeGenerator(ASTVisitor):
             return self.get_variable_type(expression.name)
 
         if isinstance(expression, FunctionCall):
-            return self.intrinsics[expression.function].type(self, expression.arguments)
+            try:
+                return self.get_bitfield_definition_by_name(expression.function)
+            except KeyError:
+                return self.intrinsics[expression.function].type(self, expression.arguments)
 
         raise RuntimeError("could not determine type of expression %r" % expression)
 
@@ -100,7 +118,11 @@ class CodeGenerator(ASTVisitor):
         self.emit(str(constant.get_value()))
 
     def visit_FunctionCall(self, func_call):
-        self.intrinsics[func_call.function].codegen(self, func_call.arguments)
+        try:
+            self.get_bitfield_definition_by_name(func_call.function)
+            self.visit(func_call.arguments[0])
+        except KeyError:
+            self.intrinsics[func_call.function].codegen(self, func_call.arguments)
 
     def visit_VarRef(self, var_ref):
         if self.get_variable_type(var_ref.name) is str:
@@ -157,23 +179,43 @@ class CodeGenerator(ASTVisitor):
         self.emit(")")
 
     def visit_Assignment(self, assignment, shadow=False):
-        var_name = assignment.variable_name.name
-        expr_type = self.expression_type(assignment.expression)
-        if shadow or not self.is_name_defined(var_name):
-            self.local_scopes[-1][var_name] = expr_type
-            if expr_type is not str:
-                self.emit("%s " % self.type_name(expr_type))
-
-        var_type = self.get_variable_type(var_name)
-        if self.are_types_compatible(var_type, expr_type):
-            if expr_type is str:
-                self.strings[-1][var_name] = assignment.expression
-            else:
-                self.emit("%s = " % var_name)
-                self.visit(assignment.expression)
-                self.emit(";\n")
+        if isinstance(assignment.variable, BitfieldAccess):
+            bitfield_access = assignment.variable
+            variable = bitfield_access.variable
+            start, length = self.get_variable_type(variable.name).get_member_limits(bitfield_access.member)
+            self.emit("%s[%d, %d] = " % (variable.name, start, length))
+            self.visit(assignment.expression)
+            self.emit(";\n")
         else:
-            raise RuntimeError("can't assign %s to %s" % (expr_type, var_type))
+            var_name = assignment.variable.name
+            expr_type = self.expression_type(assignment.expression)
+            if shadow or not self.is_name_defined(var_name):
+                self.local_scopes[-1][var_name] = expr_type
+                output_type = expr_type
+
+                if isinstance(output_type, BitfieldDefinition):
+                    output_type = int
+
+                if output_type is not str:
+                    self.emit("%s " % self.type_name(output_type))
+
+            var_type = self.get_variable_type(var_name)
+            if self.are_types_compatible(var_type, expr_type):
+                if expr_type is str:
+                    self.strings[-1][var_name] = assignment.expression
+                else:
+                    self.emit("%s = " % var_name)
+                    self.visit(assignment.expression)
+                    self.emit(";\n")
+            else:
+                raise RuntimeError("can't assign %s to %s" % (expr_type, var_type))
+
+    def visit_BitfieldDefinition(self, bitfield_definition):
+        self.bitfield_definitions[-1][bitfield_definition.name] = bitfield_definition
+
+    def visit_BitfieldAccess(self, bitfield_access):
+        self.visit(bitfield_access.variable)
+        self.emit("[%d, %d]" % self.expression_type(bitfield_access.variable).get_member_limits(bitfield_access.member))
 
     def visit_Block(self, block):
         self.push_scope()

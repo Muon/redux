@@ -25,6 +25,9 @@ def test_code_generation():
         ("a = not 1", "int a = (!1);"),
         ("a = 1.0 b = 1 + a", "float a = 1.0;\nfloat b = (1+a);"),
         ("a = 1 b = 1.0 a = b", "int a = 1;\nfloat b = 1.0;\na = b;"),
+        ("bitfield A x : 12 y : 12 z : 8 end a = A(0)", "int a = 0;"),
+        ("bitfield A x : 12 y : 12 z : 8 end a = A(0) a.x = 1", "int a = 0;\na[0, 12] = 1;"),
+        ("bitfield A x : 12 y : 12 z : 8 end a = A(0) b = a.y", "int a = 0;\nint b = a[12, 12];"),
     ]
 
     for redux_code, rescript_code in code_examples:

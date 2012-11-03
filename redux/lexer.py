@@ -36,6 +36,7 @@ class Lexer(object):
         'LPAREN',
         'RPAREN',
         'COMMA',
+        'DOT',
         'PLUS',
         'MINUS',
         'TIMES',
@@ -56,6 +57,7 @@ class Lexer(object):
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
     t_COMMA = r','
+    t_DOT = r'\.'
     t_PLUS = r'\+'
     t_MINUS = r'-'
     t_TIMES = r'\*'

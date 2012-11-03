@@ -1,8 +1,8 @@
 from nose.tools import eq_
 from redux.ast import (Block, Assignment, WhileStmt, IfStmt, FunctionCall,
                        BreakStmt, ReturnStmt, CodeLiteral, BitfieldDefinition,
-                       FunctionDefinition, Constant, VarRef, AddOp, EqualToOp,
-                       GreaterThanOp, LogicalNotOp)
+                       BitfieldAccess, FunctionDefinition, Constant, VarRef,
+                       AddOp, EqualToOp, GreaterThanOp, LogicalNotOp)
 from redux.parser import parse
 
 
@@ -23,6 +23,7 @@ def test_valid_parses():
         ("def f(a, b) end", Block([FunctionDefinition("f", ["a", "b"], Block([]))])),
         ("a = (b)", Block([Assignment(VarRef("a"), VarRef("b"))])),
         ("bitfield A x : 8 y : 8 end", Block([BitfieldDefinition("A", [("x", 8), ("y", 8)])])),
+        ("a.x = 0", Block([Assignment(BitfieldAccess(VarRef("a"), "x"), Constant(0))])),
         ("a = not a", Block([Assignment(VarRef("a"), LogicalNotOp(VarRef("a")))])),
     ]
 

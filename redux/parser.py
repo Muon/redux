@@ -1,10 +1,11 @@
 from ply import yacc
 from redux.ast import (Block, Assignment, WhileStmt, IfStmt, FunctionCall,
                        BreakStmt, ReturnStmt, CodeLiteral, BitfieldDefinition,
-                       FunctionDefinition, Constant, VarRef, AddOp, SubOp,
-                       MulOp, DivOp, EqualToOp, NotEqualToOp, GreaterThanOp,
-                       GreaterThanOrEqualToOp, LessThanOp, LessThanOrEqualToOp,
-                       LogicalNotOp, LogicalAndOp, LogicalOrOp)
+                       FunctionDefinition, Constant, VarRef, BitfieldAccess,
+                       AddOp, SubOp, MulOp, DivOp, EqualToOp, NotEqualToOp,
+                       GreaterThanOp, GreaterThanOrEqualToOp, LessThanOp,
+                       LessThanOrEqualToOp, LogicalNotOp, LogicalAndOp,
+                       LogicalOrOp)
 from redux.lexer import Lexer
 
 
@@ -59,7 +60,10 @@ class Parser(object):
 
 
     def p_assignment(self, p):
-        "assignment : variable ASSIGN expression"
+        """
+        assignment : variable ASSIGN expression
+                   | bitfield_access ASSIGN expression
+        """
         p[0] = Assignment(p[1], p[3])
 
 
@@ -159,6 +163,11 @@ class Parser(object):
         p[0] = p[1]
 
 
+    def p_expression_bitfield_access(self, p):
+        "expression : bitfield_access"
+        p[0] = p[1]
+
+
     def p_expression_paren(self, p):
         "expression : LPAREN expression RPAREN"
         p[0] = p[2]
@@ -236,6 +245,10 @@ class Parser(object):
         "bitfield_def : BITFIELD ID bitfield_member_list END"
         p[0] = BitfieldDefinition(p[2], p[3])
 
+
+    def p_bitfield_access(self, p):
+        "bitfield_access : variable DOT ID"
+        p[0] = BitfieldAccess(p[1], p[3])
 
     def p_error(self, p):
         if p is None:

@@ -36,8 +36,8 @@ class CodeLiteral(ASTNode):
 
 
 class Assignment(ASTNode):
-    def __init__(self, variable_name, expression):
-        self.variable_name = variable_name
+    def __init__(self, variable, expression):
+        self.variable = variable
         self.expression = expression
 
 
@@ -68,6 +68,17 @@ class BitfieldDefinition(ASTNode):
         self.members = members
 
 
+    def get_member_limits(self, member):
+        total_length = 0
+        for name, length in self.members:
+            if name == member:
+                return total_length, length
+
+            total_length += length
+
+        raise KeyError(member)
+
+
 class Constant(ASTNode):
     def __init__(self, value):
         self.value = value
@@ -82,6 +93,12 @@ class Constant(ASTNode):
 class VarRef(ASTNode):
     def __init__(self, name):
         self.name = name
+
+
+class BitfieldAccess(ASTNode):
+    def __init__(self, variable, member):
+        self.variable = variable
+        self.member = member
 
 
 class BinaryOp(ASTNode):
