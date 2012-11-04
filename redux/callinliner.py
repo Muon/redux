@@ -1,6 +1,6 @@
 from redux.ast import (Block, Assignment, WhileStmt, IfStmt, BreakStmt,
                        ReturnStmt, Constant, VarRef)
-from redux.intrinsics import IntrinsicFunction
+from redux.intrinsics import IntrinsicFunction, SetAchronalField, GetAchronalField
 from redux.visitor import ASTVisitor
 
 
@@ -8,7 +8,7 @@ class CallInliner(ASTVisitor):
     """Inlines all calls to nontrivial functions."""
     def __init__(self):
         super(CallInliner, self).__init__()
-        self.local_scopes = []
+        self.local_scopes = [{"__set_achronal_field": SetAchronalField(), "__get_achronal_field": GetAchronalField()}]
         self.block_stack = []
         self.return_value_counter = 0
 

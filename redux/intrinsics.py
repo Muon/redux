@@ -1,5 +1,6 @@
 from redux.autorepr import AutoRepr
-
+from redux.ast import (Block, FunctionDefinition, CodeLiteral, ReturnStmt,
+                       VarRef)
 
 class IntrinsicFunction(AutoRepr):
     @property
@@ -33,3 +34,6 @@ class SqrtFunction(IntrinsicFunction):
 
     def type(self, code_generator, args):
         return float
+
+GetAchronalField = lambda: FunctionDefinition("__get_achronal_field", ["num"], Block([CodeLiteral("PERFORM GET_ACHRONAL_FIELD num;"), ReturnStmt(VarRef("perf_ret"))]))
+SetAchronalField = lambda: FunctionDefinition("__set_achronal_field", ["num", "value"], Block([CodeLiteral("target = num; PERFORM SET_ACHRONAL_FIELD value;")]))

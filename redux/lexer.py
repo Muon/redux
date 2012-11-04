@@ -26,7 +26,8 @@ class Lexer(object):
         "return": "RETURN",
         "break": "BREAK",
         "bitfield": "BITFIELD",
-        "enum": "ENUM"
+        "enum": "ENUM",
+        "AF": "AF"
     }
 
     tokens = (
@@ -50,7 +51,10 @@ class Lexer(object):
         'STRING',
         'ASSIGN',
         'CODELITERAL',
+        'LBRACKET',
+        'RBRACKET'
     ) + tuple(reserved.values())
+
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
     t_COMMA = r','
@@ -67,6 +71,8 @@ class Lexer(object):
     t_NEQ = r'!='
     t_ASSIGN = r'='
     t_COLON = r':'
+    t_LBRACKET = r'\['
+    t_RBRACKET = r'\]'
 
     t_ignore_COMMENT = r'\#.*'
 

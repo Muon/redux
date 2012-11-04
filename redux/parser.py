@@ -230,6 +230,18 @@ class Parser(object):
         "enum_member : ID ASSIGN NUMBER"
         p[0] = (p[1], p[3])
 
+    def p_achronal_field_ref(self, p):
+        "achronal_field_ref : AF LBRACKET expression RBRACKET"
+        p[0] = p[3]
+
+    def p_achronal_field_ref_expr(self, p):
+        "expression : achronal_field_ref"
+        p[0] = FunctionCall("__get_achronal_field", (p[1],))
+
+    def p_achronal_field_assignment(self, p):
+        "stmt : achronal_field_ref ASSIGN expression"
+        p[0] = FunctionCall("__set_achronal_field", (p[1], p[3]))
+
     def p_error(self, p):
         if p is None:
             lineno = 0
