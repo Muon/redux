@@ -33,5 +33,5 @@ def test_valid_parses():
 
 def check_valid_parse(code, ast_):
     compiled_ast, errors = parse(code)
-    assert not errors
+    eq_(errors, [])
     eq_(compiled_ast, ast_)
