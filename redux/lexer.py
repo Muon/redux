@@ -25,8 +25,10 @@ class Lexer(object):
         "def": "DEF",
         "return": "RETURN",
         "break": "BREAK",
-        "bitfield": "BITFIELD"
+        "bitfield": "BITFIELD",
+        "enum": "ENUM"
     }
+
     tokens = (
         'ID',
         'LPAREN',

@@ -1,11 +1,11 @@
 from ply import yacc
 from redux.ast import (Block, Assignment, WhileStmt, IfStmt, FunctionCall,
                        BreakStmt, ReturnStmt, CodeLiteral, BitfieldDefinition,
-                       FunctionDefinition, Constant, VarRef, BitfieldAccess,
-                       AddOp, SubOp, MulOp, DivOp, EqualToOp, NotEqualToOp,
-                       GreaterThanOp, GreaterThanOrEqualToOp, LessThanOp,
-                       LessThanOrEqualToOp, LogicalNotOp, LogicalAndOp,
-                       LogicalOrOp)
+                       EnumDefinition, FunctionDefinition, Constant, VarRef,
+                       BitfieldAccess, AddOp, SubOp, MulOp, DivOp, EqualToOp,
+                       NotEqualToOp, GreaterThanOp, GreaterThanOrEqualToOp,
+                       LessThanOp, LessThanOrEqualToOp, LogicalNotOp,
+                       LogicalAndOp, LogicalOrOp)
 from redux.lexer import Lexer
 
 
@@ -44,6 +44,7 @@ class Parser(object):
              | code_literal
              | break_stmt
              | bitfield_def
+             | enum_def
         """
         p[0] = p[1]
 
@@ -208,6 +209,26 @@ class Parser(object):
     def p_bitfield_access(self, p):
         "bitfield_access : variable DOT ID"
         p[0] = BitfieldAccess(p[1], p[3])
+
+    def p_enum_def(self, p):
+        "enum_def : ENUM ID enum_member_list END"
+        p[0] = EnumDefinition(p[2], p[3])
+
+    def p_enum_member_list_start(self, p):
+        "enum_member_list : enum_member"
+        p[0] = [p[1]]
+
+    def p_enum_member_list(self, p):
+        "enum_member_list : enum_member_list enum_member"
+        p[0] = p[1] + [p[2]]
+
+    def p_enum_member(self, p):
+        "enum_member : ID"
+        p[0] = (p[1], None)
+
+    def p_enum_member_numbered(self, p):
+        "enum_member : ID ASSIGN NUMBER"
+        p[0] = (p[1], p[3])
 
     def p_error(self, p):
         if p is None:

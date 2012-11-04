@@ -1,6 +1,6 @@
 import sys
 from redux.ast import (FunctionCall, Constant, VarRef, BinaryOp, RelationalOp,
-                       BitfieldDefinition, BitfieldAccess)
+                       BitfieldDefinition, EnumDefinition, BitfieldAccess)
 from redux.callinliner import CallInliner
 from redux.intrinsics import SayFunction, SqrtFunction
 from redux.parser import parse
@@ -17,6 +17,7 @@ class CodeGenerator(ASTVisitor):
         super(CodeGenerator, self).__init__()
         self.local_scopes = [{"perf_ret": int, "perf_ret_float": float}]
         self.strings = []
+        self.enums = []
         self.bitfield_definitions = []
         self.intrinsics = {"say": SayFunction(), "sqrt": SqrtFunction()}
 
@@ -30,8 +31,10 @@ class CodeGenerator(ASTVisitor):
         self.local_scopes.append({})
         self.strings.append({})
         self.bitfield_definitions.append({})
+        self.enums.append({})
 
     def pop_scope(self):
+        self.enums.pop()
         self.bitfield_definitions.pop()
         self.strings.pop()
         self.local_scopes.pop()
@@ -53,6 +56,13 @@ class CodeGenerator(ASTVisitor):
 
     def get_bitfield_definition_by_name(self, name):
         for scope in reversed(self.bitfield_definitions):
+            if name in scope:
+                return scope[name]
+
+        raise KeyError(name)
+
+    def get_enum_value_by_name(self, name):
+        for scope in reversed(self.enums):
             if name in scope:
                 return scope[name]
 
@@ -124,8 +134,11 @@ class CodeGenerator(ASTVisitor):
             self.intrinsics[func_call.function].codegen(self, func_call.arguments)
 
     def visit_VarRef(self, var_ref):
-        if self.get_variable_type(var_ref.name) is str:
+        var_type = self.get_variable_type(var_ref.name)
+        if var_type is str:
             self.visit(self.get_string_by_name(var_ref.name))
+        elif isinstance(var_type, EnumDefinition):
+            self.visit(self.get_enum_value_by_name(var_ref.name))
         else:
             self.emit(var_ref.name)
 
@@ -195,6 +208,9 @@ class CodeGenerator(ASTVisitor):
                 if isinstance(output_type, BitfieldDefinition):
                     output_type = int
 
+                if isinstance(output_type, EnumDefinition):
+                    output_type = int
+
                 if output_type is not str:
                     self.emit("%s " % self.type_name(output_type))
 
@@ -215,6 +231,11 @@ class CodeGenerator(ASTVisitor):
     def visit_BitfieldAccess(self, bitfield_access):
         self.visit(bitfield_access.variable)
         self.emit("[%d, %d]" % self.expression_type(bitfield_access.variable).get_member_limits(bitfield_access.member))
+
+    def visit_EnumDefinition(self, enum_definition):
+        for name, value in enum_definition.members:
+            self.enums[-1][name] = Constant(value)
+            self.local_scopes[-1][name] = enum_definition
 
     def visit_Block(self, block):
         self.push_scope()

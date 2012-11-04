@@ -29,6 +29,7 @@ def test_code_generation():
         ("bitfield A x : 12 y : 12 z : 8 end a = A(0)", "int a = 0;"),
         ("bitfield A x : 12 y : 12 z : 8 end a = A(0) a.x = 1", "int a = 0;\na[0, 12] = 1;"),
         ("bitfield A x : 12 y : 12 z : 8 end a = A(0) b = a.y", "int a = 0;\nint b = a[12, 12];"),
+        ("enum A a b c d end x = a", "int x = 0;"),
     ]
 
     for redux_code, rescript_code in code_examples:

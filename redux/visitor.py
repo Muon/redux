@@ -51,6 +51,9 @@ class ASTVisitor(Visitor):
     def visit_BitfieldDefinition(self, bitfield_def):
         return bitfield_def
 
+    def visit_EnumDefinition(self, enum_def):
+        return enum_def
+
     def visit_IfStmt(self, if_stmt):
         self.visit(if_stmt.condition)
         self.visit(if_stmt.then_block)

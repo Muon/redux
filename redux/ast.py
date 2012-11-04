@@ -78,6 +78,24 @@ class BitfieldDefinition(ASTNode):
         raise KeyError(member)
 
 
+class EnumDefinition(ASTNode):
+    def __init__(self, name, members):
+        self.name = name
+        computed_members = []
+
+        counter = -1
+        for name, value in members:
+            if value is None:
+                counter += 1
+            else:
+                assert value > counter
+                counter = value
+
+            computed_members.append((name, counter))
+
+        self.members = computed_members
+
+
 class Constant(ASTNode):
     def __init__(self, value):
         self.value = value
