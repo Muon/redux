@@ -41,28 +41,22 @@ class CodeGenerator(ASTVisitor):
         self.emit("}\n")
 
     def get_variable_type(self, name):
-        for scope in reversed(self.local_scopes):
-            if name in scope:
-                return scope[name]
-
-        raise UndefinedVariableError("%s is not defined" % name)
+        try:
+            return self._scope_search(self.local_scopes, name)
+        except KeyError:
+            raise UndefinedVariableError(name)
 
     def get_string_by_name(self, name):
-        for scope in reversed(self.strings):
-            if name in scope:
-                return scope[name]
-
-        raise KeyError(name)
+        return self._scope_search(self.strings, name)
 
     def get_bitfield_definition_by_name(self, name):
-        for scope in reversed(self.bitfield_definitions):
-            if name in scope:
-                return scope[name]
-
-        raise KeyError(name)
+        return self._scope_search(self.bitfield_definitions, name)
 
     def get_enum_value_by_name(self, name):
-        for scope in reversed(self.enums):
+        return self._scope_search(self.enums, name)
+
+    def _scope_search(self, scope_list, name):
+        for scope in reversed(scope_list):
             if name in scope:
                 return scope[name]
 
