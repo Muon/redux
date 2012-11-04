@@ -7,7 +7,7 @@ from redux.parser import parse
 from redux.visitor import ASTVisitor
 
 
-class UndefinedVariableError(RuntimeError):
+class UndefinedVariableError(KeyError):
     pass
 
 
