@@ -52,7 +52,7 @@ class CodeGenerator(ASTVisitor):
             if name in scope:
                 return scope[name]
 
-        assert False
+        raise KeyError(name)
 
     def get_bitfield_definition_by_name(self, name):
         for scope in reversed(self.bitfield_definitions):
