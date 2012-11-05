@@ -68,12 +68,12 @@ class BitfieldDefinition(ASTNode):
         self.members = members
 
     def get_member_limits(self, member):
-        total_length = 0
+        offset = 0
         for name, length in self.members:
             if name == member:
-                return total_length, length
+                return offset, length
 
-            total_length += length
+            offset += length
 
         raise KeyError(member)
 
