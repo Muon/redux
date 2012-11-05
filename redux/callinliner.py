@@ -1,6 +1,7 @@
 from redux.ast import (Block, Assignment, WhileStmt, IfStmt, BreakStmt,
                        ReturnStmt, Constant, VarRef)
 from redux.intrinsics import IntrinsicFunction, SetAchronalField, GetAchronalField
+from redux.types import int_
 from redux.visitor import ASTVisitor
 
 
@@ -20,7 +21,7 @@ class CallInliner(ASTVisitor):
 
     def allocate_temporary(self):
         temporary = VarRef("__retval%d" % self.return_value_counter)
-        self.block_stack[-1].append(Assignment(temporary, Constant(0)))
+        self.block_stack[-1].append(Assignment(temporary, Constant(0, int_)))
         self.return_value_counter += 1
         return temporary
 
@@ -41,7 +42,9 @@ class CallInliner(ASTVisitor):
         new_statements = []
         self.block_stack.append(new_statements)
         for statement in block.statements:
-            new_statements.append(self.visit(statement))
+            new_statement = self.visit(statement)
+            if new_statement is not None:
+                new_statements.append(new_statement)
 
         block.statements = new_statements
         self.block_stack.pop()
@@ -76,7 +79,7 @@ class CallInliner(ASTVisitor):
         new_block = self.visit(Block([IfStmt(while_stmt.condition,
                                              while_stmt.block,
                                              Block([BreakStmt()]))]))
-        return WhileStmt(Constant(1), new_block)
+        return WhileStmt(Constant(1, int_), new_block)
 
     def visit_FunctionCall(self, func_call):
         new_arguments = []
@@ -98,17 +101,17 @@ class CallInliner(ASTVisitor):
 
             return_var = None
 
-            if isinstance(new_block.statements[-1], ReturnStmt):
+            if new_block.statements and isinstance(new_block.statements[-1], ReturnStmt):
                 return_var = self.allocate_temporary()
                 return_expr = new_block.statements[-1].expression
                 new_block.statements[-1] = Assignment(return_var, return_expr)
 
             self.visit(new_block)
 
+            self.block_stack[-1].append(new_block)
             if return_var is not None:
-                self.block_stack[-1].append(new_block)
                 return return_var
             else:
-                return new_block
+                return None
         else:
             return func_call

@@ -49,4 +49,4 @@ class StructEq(object):
         # were returned, which depends on the order in which they were added to
         # __dict__.  Using frozenset fixes this, because it imposes an ordering
         # based on the items themselves, rather than the keys.
-        return hash(frozenset(self.__dict__.iteritems()))
+        return hash(frozenset(self.__dict__.items()))

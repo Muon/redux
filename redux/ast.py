@@ -1,6 +1,6 @@
-import codecs
 from redux.autorepr import AutoRepr
 from redux.structeq import StructEq
+from redux.types import Type
 
 
 class ASTNode(AutoRepr, StructEq):
@@ -41,6 +41,10 @@ class Assignment(ASTNode):
         self.expression = expression
 
 
+class BitfieldAssignment(Assignment):
+    pass
+
+
 class IfStmt(ASTNode):
     def __init__(self, condition, then_block, else_part=None):
         self.condition = condition
@@ -62,7 +66,7 @@ class FunctionDefinition(ASTNode):
         self.nontrivial = True
 
 
-class BitfieldDefinition(ASTNode):
+class BitfieldDefinition(ASTNode, Type):
     def __init__(self, name, members):
         self.name = name
         self.members = members
@@ -78,7 +82,7 @@ class BitfieldDefinition(ASTNode):
         raise KeyError(member)
 
 
-class EnumDefinition(ASTNode):
+class EnumDefinition(ASTNode, Type):
     def __init__(self, name, members):
         self.name = name
         computed_members = []
@@ -97,14 +101,9 @@ class EnumDefinition(ASTNode):
 
 
 class Constant(ASTNode):
-    def __init__(self, value):
+    def __init__(self, value, type_):
         self.value = value
-
-    def get_value(self):
-        if isinstance(self.value, int) or isinstance(self.value, float):
-            return repr(self.value)
-        else:
-            return "\"" + codecs.getencoder("unicode_escape")(self.value)[0].decode("utf8") + "\""
+        self.type = type_
 
 
 class VarRef(ASTNode):

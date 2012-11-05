@@ -1,12 +1,13 @@
 from ply import yacc
-from redux.ast import (Block, Assignment, WhileStmt, IfStmt, FunctionCall,
-                       BreakStmt, ReturnStmt, CodeLiteral, BitfieldDefinition,
-                       EnumDefinition, FunctionDefinition, Constant, VarRef,
-                       BitfieldAccess, AddOp, SubOp, MulOp, DivOp, EqualToOp,
-                       NotEqualToOp, GreaterThanOp, GreaterThanOrEqualToOp,
-                       LessThanOp, LessThanOrEqualToOp, LogicalNotOp,
-                       LogicalAndOp, LogicalOrOp)
+from redux.ast import (Block, Assignment, BitfieldAssignment, WhileStmt, IfStmt,
+                       FunctionCall, BreakStmt, ReturnStmt, CodeLiteral,
+                       BitfieldDefinition, EnumDefinition, FunctionDefinition,
+                       Constant, VarRef, BitfieldAccess, AddOp, SubOp, MulOp,
+                       DivOp, EqualToOp, NotEqualToOp, GreaterThanOp,
+                       GreaterThanOrEqualToOp, LessThanOp, LessThanOrEqualToOp,
+                       LogicalNotOp, LogicalAndOp, LogicalOrOp)
 from redux.lexer import Lexer
+from redux.types import str_, int_, float_
 
 
 class Parser(object):
@@ -53,11 +54,12 @@ class Parser(object):
         p[0] = FunctionCall(p[1], p[3])
 
     def p_assignment(self, p):
-        """
-        assignment : variable ASSIGN expression
-                   | bitfield_access ASSIGN expression
-        """
+        "assignment : variable ASSIGN expression"
         p[0] = Assignment(p[1], p[3])
+
+    def p_bitfield_assignment(self, p):
+        "assignment : bitfield_access ASSIGN expression"
+        p[0] = BitfieldAssignment(p[1], p[3])
 
     def p_assignment_error(self, p):
         "assignment : variable ASSIGN error"
@@ -115,12 +117,17 @@ class Parser(object):
         "variable : ID"
         p[0] = VarRef(p[1])
 
-    def p_constant(self, p):
-        """
-        constant : NUMBER
-                 | STRING
-        """
-        p[0] = Constant(p[1])
+    def p_constant_int(self, p):
+        "constant : INT"
+        p[0] = Constant(p[1], int_)
+
+    def p_constant_float(self, p):
+        "constant : FLOAT"
+        p[0] = Constant(p[1], float_)
+
+    def p_constant_string(self, p):
+        "constant : STRING"
+        p[0] = Constant(p[1], str_)
 
     def p_value(self, p):
         """
@@ -191,7 +198,7 @@ class Parser(object):
         p[0] = p[1] + [p[3]]
 
     def p_bitfield_member_def(self, p):
-        "bitfield_member_def : ID COLON NUMBER"
+        "bitfield_member_def : ID COLON INT"
         p[0] = (p[1], p[3])
 
     def p_bitfield_member_list_start(self, p):
@@ -227,7 +234,7 @@ class Parser(object):
         p[0] = (p[1], None)
 
     def p_enum_member_numbered(self, p):
-        "enum_member : ID ASSIGN NUMBER"
+        "enum_member : ID ASSIGN INT"
         p[0] = (p[1], p[3])
 
     def p_achronal_field_ref(self, p):

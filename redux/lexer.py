@@ -48,6 +48,8 @@ class Lexer(object):
         'NEQ',
         'COLON',
         'NUMBER',
+        'INT',
+        'FLOAT',
         'STRING',
         'ASSIGN',
         'CODELITERAL',
@@ -95,8 +97,10 @@ class Lexer(object):
         """
         try:
             t.value = int(t.value)
+            t.type = "INT"
         except ValueError:
             t.value = float(t.value)
+            t.type = "FLOAT"
         return t
 
     def t_STRING(self, t):

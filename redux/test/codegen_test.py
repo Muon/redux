@@ -1,5 +1,8 @@
-from nose.tools import eq_
-from redux.codegenerator import compile_script
+from nose.tools import eq_, raises
+from redux.codegenerator import compile_script, UndefinedVariableError
+
+def c(code):
+    return compile_script("codegen_test", code)
 
 def test_code_generation():
     code_examples = [
@@ -38,4 +41,54 @@ def test_code_generation():
         yield check_code_generation, redux_code, ("{\n" + rescript_code + "\n}\n")
 
 def check_code_generation(redux_code, rescript_code):
-    eq_(compile_script("codegen_test", redux_code), rescript_code)
+    eq_(c(redux_code), rescript_code)
+
+
+@raises(UndefinedVariableError)
+def test_undefined_var_use():
+    c("say(a)")
+
+
+@raises(UndefinedVariableError)
+def test_undefined_var_assign():
+    c("a = x")
+
+
+@raises(TypeError)
+def test_incompatible_add():
+    c('a = "abc" + "abc"')
+
+
+@raises(TypeError)
+def test_invalid_cast_to_bitfield():
+    c("x = 1 x(0)")
+
+
+@raises(TypeError)
+def test_invalid_bitfield_assign_type():
+    c("bitfield A x : 1 end a = A(0) a.x = 1.0")
+
+
+@raises(TypeError)
+def test_assign_returnless_function():
+    c("def f() end a = f()")
+
+
+@raises(TypeError)
+def test_attempt_modify_enum():
+    c("enum A x y z end x = 1")
+
+
+@raises(TypeError)
+def test_modify_string():
+    c('a = "abc" a = "def"')
+
+
+@raises(TypeError)
+def test_assign_string_to_numeric():
+    c('a = 1 a = "abc"')
+
+
+@raises(TypeError)
+def test_assign_bitfield_to_numeric():
+    c("bitfield A x : 12 end a = 1 a = A(0)")
