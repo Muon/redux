@@ -5,7 +5,7 @@ from redux.ast import (FunctionCall, Constant, VarRef, BinaryOp, RelationalOp,
 from redux.callinliner import CallInliner
 from redux.intrinsics import SayFunction, SqrtFunction
 from redux.parser import parse
-from redux.types import Type, str_, float_, int_, object_, is_numeric
+from redux.types import str_, float_, int_, object_, is_numeric
 from redux.visitor import ASTVisitor
 
 
