@@ -201,10 +201,11 @@ class CodeGenerator(ASTVisitor):
         self.emit(";\n")
 
     def visit_Assignment(self, assignment, shadow=False):
+        var_name = assignment.variable.name
         expr_type = self.expression_type(assignment.expression)
 
         try:
-            entry = self.get_scope_entry(assignment.variable.name)
+            entry = self.get_scope_entry(var_name)
             if entry.immutable:
                 if entry.type is str_:
                     raise TypeError("strings may not be mutated")
@@ -214,9 +215,9 @@ class CodeGenerator(ASTVisitor):
         except KeyError:
             var_type = expr_type
             if expr_type is str_:
-                self.scopes[-1][assignment.variable.name] = ScopeEntry(var_type, True, assignment.expression)
+                self.scopes[-1][var_name] = ScopeEntry(var_type, True, assignment.expression)
             else:
-                self.scopes[-1][assignment.variable.name] = ScopeEntry(var_type, False, None)
+                self.scopes[-1][var_name] = ScopeEntry(var_type, False, None)
                 self.emit("%s " % self.type_name(var_type))
         else:  # Variable exists
             if is_numeric(var_type) or is_numeric(expr_type):
