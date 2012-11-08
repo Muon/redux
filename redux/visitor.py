@@ -23,7 +23,7 @@ class ASTVisitor(Visitor):
         raise RuntimeError("non-AST node object %r visited" % node)
 
     def visit_ASTNode(self, node):
-        assert False, "Unhandled node in AST visitor."
+        assert False, "unhandled node in AST visitor: %r" % node
 
     def visit_Block(self, block):
         self.push_scope()
