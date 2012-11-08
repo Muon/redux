@@ -54,6 +54,9 @@ class ASTVisitor(Visitor):
     def visit_EnumDefinition(self, enum_def):
         return enum_def
 
+    def visit_BitfieldAccess(self, bitfield_access):
+        return bitfield_access
+
     def visit_IfStmt(self, if_stmt):
         self.visit(if_stmt.condition)
         self.visit(if_stmt.then_block)
@@ -88,3 +91,11 @@ class ASTVisitor(Visitor):
         self.visit(node.rhs)
 
         return node
+
+    def visit_LogicalNotOp(self, node):
+        self.visit(node.expression)
+
+        return node
+
+    def visit_CodeLiteral(self, code_literal):
+        return code_literal
