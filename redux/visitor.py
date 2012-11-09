@@ -78,7 +78,7 @@ class ASTVisitor(Visitor):
 
         return while_stmt
 
-    def visit_ReturnStatement(self, return_stmt):
+    def visit_ReturnStmt(self, return_stmt):
         self.visit(return_stmt.expression)
 
         return return_stmt
