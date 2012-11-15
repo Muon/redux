@@ -28,6 +28,9 @@ class ASTVisitor(Visitor):
     def visit_Block(self, block):
         self.push_scope()
 
+        for override in block.scope_overrides:
+            self.visit(override)
+
         for statement in block.statements:
             self.visit(statement)
 
@@ -99,3 +102,63 @@ class ASTVisitor(Visitor):
 
     def visit_CodeLiteral(self, code_literal):
         return code_literal
+
+
+class ASTTransformer(ASTVisitor):
+    def visit_Block(self, block):
+        self.push_scope()
+
+        new_statements = []
+
+        for i, statement in enumerate(block.statements):
+            new_statement = self.visit(statement)
+
+            if new_statement is not None:
+                new_statements.append(new_statement)
+
+        block.statements = new_statements
+
+        self.pop_scope()
+
+        return block
+
+    def visit_Assignment(self, assignment):
+        assignment.expression = self.visit(assignment.expression)
+        return assignment
+
+    def visit_FunctionCall(self, func_call):
+        for i, argument in enumerate(func_call.arguments):
+            func_call.arguments[i] = self.visit(argument)
+
+        return func_call
+
+    def visit_IfStmt(self, if_stmt):
+        if_stmt.condition = self.visit(if_stmt.condition)
+        if_stmt.then_block = self.visit(if_stmt.then_block)
+
+        if if_stmt.else_part:
+            if_stmt.else_part = self.visit(if_stmt.else_part)
+
+        return if_stmt
+
+    def visit_WhileStmt(self, while_stmt):
+        while_stmt.condition = self.visit(while_stmt.condition)
+        while_stmt.block = self.visit(while_stmt.block)
+
+        return while_stmt
+
+    def visit_ReturnStatement(self, return_stmt):
+        return_stmt.expression = self.visit(return_stmt.expression)
+
+        return return_stmt
+
+    def visit_BinaryOp(self, node):
+        node.lhs = self.visit(node.lhs)
+        node.rhs = self.visit(node.rhs)
+
+        return node
+
+    def visit_LogicalNotOp(self, node):
+        self.visit(node.expression)
+
+        return node

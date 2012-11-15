@@ -19,21 +19,22 @@ class SayFunction(IntrinsicFunction):
             code_generator.emit(", ")
             code_generator.visit(arg)
 
-    def type(self, code_generator, args):
+    @property
+    def type(self):
         return None
 
 
 class SqrtFunction(IntrinsicFunction):
     def codegen(self, code_generator, args):
         assert len(args) == 1
-        arg_type = code_generator.expression_type(args[0])
-        assert is_numeric(arg_type)
+        assert is_numeric(args[0].type)
 
         code_generator.emit("(|/")
         code_generator.visit(args[0])
         code_generator.emit(")")
 
-    def type(self, code_generator, args):
+    @property
+    def type(self):
         return float_
 
 GetAchronalField = lambda: FunctionDefinition("__get_achronal_field", ["num"], Block([CodeLiteral("PERFORM GET_ACHRONAL_FIELD num;"), ReturnStmt(VarRef("perf_ret"))]))

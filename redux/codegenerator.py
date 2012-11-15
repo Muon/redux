@@ -1,16 +1,13 @@
 import sys
 from collections import namedtuple
-from redux.ast import (FunctionCall, Constant, VarRef, BinaryOp, RelationalOp,
-                       BitfieldDefinition, BitfieldAccess)
+from redux.ast import Constant, BitfieldDefinition
 from redux.callinliner import CallInliner
 from redux.intrinsics import SayFunction, SqrtFunction
 from redux.parser import parse
+from redux.stringinliner import StringInliner
+from redux.typeannotate import TypeAnnotator
 from redux.types import str_, float_, int_, object_, is_numeric
 from redux.visitor import ASTVisitor
-
-
-class UndefinedVariableError(KeyError):
-    pass
 
 
 ScopeEntry = namedtuple("ScopeEntry", ("type", "immutable", "value"))
@@ -42,59 +39,12 @@ class CodeGenerator(ASTVisitor):
         self.scopes.pop()
         self.emit("}\n")
 
-    def get_var_ref_type(self, var_ref):
-        try:
-            return self.get_scope_entry(var_ref.name).type
-        except KeyError:
-            raise UndefinedVariableError(var_ref.name)
-
     def get_scope_entry(self, name):
         for scope in reversed(self.scopes):
             if name in scope:
                 return scope[name]
 
         raise KeyError(name)
-
-    def common_type(self, a, b):
-        a_type = self.expression_type(a)
-        b_type = self.expression_type(b)
-
-        if is_numeric(a_type) and is_numeric(b_type):
-            if a_type is int_ and b_type is int_:
-                return int_
-
-            if a_type is float_ or b_type is float_:
-                return float_
-
-        raise TypeError("no common type for %s and %s (%r and %r)" % (a_type, b_type, a, b))
-
-    def expression_type(self, expression):
-        if isinstance(expression, Constant):
-            return expression.type
-
-        if isinstance(expression, BitfieldAccess):
-            return int_
-
-        if isinstance(expression, RelationalOp):
-            return int_
-
-        if isinstance(expression, BinaryOp):
-            return self.common_type(expression.lhs, expression.rhs)
-
-        if isinstance(expression, VarRef):
-            return self.get_var_ref_type(expression)
-
-        if isinstance(expression, FunctionCall):
-            try:
-                entry = self.get_scope_entry(expression.function)
-                if entry.type is BitfieldDefinition:
-                    return entry.value
-            except KeyError:
-                pass
-
-            return self.intrinsics[expression.function].type(self, expression.arguments)
-
-        raise TypeError("could not determine type of %r" % expression)
 
     def type_name(self, type_):
         if isinstance(type_, BitfieldDefinition):
@@ -111,28 +61,19 @@ class CodeGenerator(ASTVisitor):
             assert False, "constant of unknown type %r" % constant.type
 
     def visit_FunctionCall(self, func_call):
-        try:
-            entry = self.get_scope_entry(func_call.function)
-            if entry.type is not BitfieldDefinition:
-                raise TypeError("'%s' is not a type" % func_call.function)
+        if isinstance(func_call.type, BitfieldDefinition):
             self.visit(func_call.arguments[0])
-        except KeyError:
+        else:
             self.intrinsics[func_call.function].codegen(self, func_call.arguments)
 
     def visit_VarRef(self, var_ref):
-        try:
-            entry = self.get_scope_entry(var_ref.name)
-        except KeyError:
-            raise UndefinedVariableError(var_ref.name)
-
+        entry = self.get_scope_entry(var_ref.name)
         if entry.immutable:
             self.visit(entry.value)
         else:
             self.emit(var_ref.name)
 
     def emit_binary_op(self, binop, op):
-        self.common_type(binop.lhs, binop.rhs)
-
         self.emit("(")
         self.visit(binop.lhs)
         self.emit(op)
@@ -180,65 +121,30 @@ class CodeGenerator(ASTVisitor):
         self.visit(a.expression)
         self.emit(")")
 
-    # Variables being assigned to must have the proper type, or be unused.
-    #
-    # Possibilities:
-    # - assign int/float to variable
-    # - assign int to bitfield member
-    # - assign string to an *unused* variable
-    #
-    # Procedure:
-    # 1. Verify validity of assignment.
-    # 2. Output assignment, if the expression is not a string.
-
     def visit_BitfieldAssignment(self, assignment):
-        if self.expression_type(assignment.expression) is not int_:
-            raise TypeError("only int maybe assigned to a bitfield member")
+        self.visit(assignment.variable)
+        self.emit(" = ")
+        self.visit(assignment.expression)
+
+    def visit_Assignment(self, assignment, shadow=False):
+        var_name = assignment.variable.name
+        expr_type = assignment.expression.type
+
+        try:
+            entry = self.get_scope_entry(var_name)
+            var_type = entry.type
+        except KeyError:
+            var_type = expr_type
+            self.scopes[-1][var_name] = ScopeEntry(var_type, False, None)
+            self.emit("%s " % self.type_name(var_type))
 
         self.visit(assignment.variable)
         self.emit(" = ")
         self.visit(assignment.expression)
-        self.emit(";\n")
-
-    def visit_Assignment(self, assignment, shadow=False):
-        var_name = assignment.variable.name
-        expr_type = self.expression_type(assignment.expression)
-
-        try:
-            entry = self.get_scope_entry(var_name)
-            if entry.immutable:
-                if entry.type is str_:
-                    raise TypeError("strings may not be mutated")
-                else:
-                    raise TypeError("attempt to modify immutable variable")
-            var_type = entry.type
-        except KeyError:
-            var_type = expr_type
-            if expr_type is str_:
-                self.scopes[-1][var_name] = ScopeEntry(var_type, True, assignment.expression)
-            else:
-                self.scopes[-1][var_name] = ScopeEntry(var_type, False, None)
-                self.emit("%s " % self.type_name(var_type))
-        else:  # Variable exists
-            if is_numeric(var_type) or is_numeric(expr_type):
-                if not(is_numeric(var_type) and is_numeric(expr_type)):
-                    raise TypeError("cannot assign %r to %r" % (expr_type, var_type))
-
-        assert is_numeric(expr_type) or expr_type is str_ or isinstance(expr_type, BitfieldDefinition), "%r (%r)" % (expr_type, assignment.expression)
-        assert is_numeric(var_type) or var_type is str_ or isinstance(var_type, BitfieldDefinition), "%r (%r)" % (var_type, assignment.variable)
-
-        if expr_type is not str_:
-            self.visit(assignment.variable)
-            self.emit(" = ")
-            self.visit(assignment.expression)
-            self.emit(";\n")
-
-    def visit_BitfieldDefinition(self, bitfield_definition):
-        self.scopes[-1][bitfield_definition.name] = ScopeEntry(BitfieldDefinition, True, bitfield_definition)
 
     def visit_BitfieldAccess(self, bitfield_access):
         self.visit(bitfield_access.variable)
-        self.emit("[%d, %d]" % self.get_var_ref_type(bitfield_access.variable).get_member_limits(bitfield_access.member))
+        self.emit("[%d, %d]" % bitfield_access.variable.type.get_member_limits(bitfield_access.member))
 
     def visit_EnumDefinition(self, enum_definition):
         for name, value in enum_definition.members:
@@ -248,13 +154,19 @@ class CodeGenerator(ASTVisitor):
         self.push_scope()
 
         for assignment in block.scope_overrides:
+            old_length = len(self.code)
             self.visit(assignment, True)
+            if old_length < len(self.code) and \
+               self.code[-1] != ";" and \
+               self.code[-2:] != "}\n":
+                self.emit(";\n")
+
 
         for statement in block.statements:
+            old_length = len(self.code)
             self.visit(statement)
-            if isinstance(statement, FunctionCall):
-                if not self.intrinsics[statement.function].nontrivial:
-                    self.emit(";\n")
+            if old_length < len(self.code) and self.code[-1] != ";" and self.code[-2:] != "}\n":
+                self.emit(";\n")
 
         self.pop_scope()
 
@@ -277,7 +189,7 @@ class CodeGenerator(ASTVisitor):
         self.emit(code_literal.code)
 
     def visit_BreakStmt(self, break_stmt):
-        self.emit("break;\n")
+        self.emit("break")
 
 
 def compile_script(filename, code):
@@ -286,5 +198,10 @@ def compile_script(filename, code):
     for lineno, message in errors:
         sys.stderr.write("%s:%d: %s\n" % (filename, lineno, message))
 
-    code_generator.visit(CallInliner().visit(ast_))
+    ast_ = TypeAnnotator().visit(ast_)
+    ast_ = CallInliner().visit(ast_)
+    ast_ = StringInliner().visit(ast_)
+
+    code_generator.visit(ast_)
+
     return code_generator.code

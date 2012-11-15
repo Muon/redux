@@ -1,0 +1,13 @@
+Redux:
+
+Feature parity:
+ ☐ For loops
+ ☐ Bitwise operators
+ ☐ QUERY expressions
+ ☐ object fields
+ ☐ Other intrinsic functions (max, min, dist, distSq, sin, cos, tan, etc.)
+AST:
+ ☐ Rewrite AST nodes using collections.namedtuple
+ ☐ Simplify visitors
+Code generator:
+ ✔ Refactor code generation into multiple passes @done (2012-11-15 20:20)

@@ -1,8 +1,11 @@
 from nose.tools import eq_, raises
-from redux.codegenerator import compile_script, UndefinedVariableError
+from redux.codegenerator import compile_script
+from redux.typeannotate import UndefinedVariableError, InvalidExpressionError, NotCallableError, IncompatibleTypeError, UndefinedTypeError, ImmutabilityViolationError
+
 
 def c(code):
     return compile_script("codegen_test", code)
+
 
 def test_code_generation():
     code_examples = [
@@ -35,10 +38,12 @@ def test_code_generation():
         ("enum A a b c d end x = a", "int x = 0;"),
         ("AF[0] = 1", "{\nint num = 0;\nint value = 1;\ntarget = num; PERFORM SET_ACHRONAL_FIELD value;}"),
         ("a = AF[0]", "int __retval0 = 0;\n{\nint num = 0;\nPERFORM GET_ACHRONAL_FIELD num;__retval0 = perf_ret;\n}\nint a = __retval0;"),
+        ("def f() return sqrt(1) end f()", "float __retval0 = 0;\n{\n__retval0 = (|/1);\n}\n__retval0;"),
     ]
 
     for redux_code, rescript_code in code_examples:
         yield check_code_generation, redux_code, ("{\n" + rescript_code + "\n}\n")
+
 
 def check_code_generation(redux_code, rescript_code):
     eq_(c(redux_code), rescript_code)
@@ -54,41 +59,46 @@ def test_undefined_var_assign():
     c("a = x")
 
 
-@raises(TypeError)
+@raises(InvalidExpressionError)
 def test_incompatible_add():
     c('a = "abc" + "abc"')
 
 
-@raises(TypeError)
+@raises(NotCallableError)
 def test_invalid_cast_to_bitfield():
     c("x = 1 x(0)")
 
 
-@raises(TypeError)
+@raises(IncompatibleTypeError)
 def test_invalid_bitfield_assign_type():
     c("bitfield A x : 1 end a = A(0) a.x = 1.0")
 
 
-@raises(TypeError)
+@raises(UndefinedTypeError)
 def test_assign_returnless_function():
     c("def f() end a = f()")
 
 
-@raises(TypeError)
+@raises(ImmutabilityViolationError)
 def test_attempt_modify_enum():
     c("enum A x y z end x = 1")
 
 
-@raises(TypeError)
+@raises(IncompatibleTypeError)
 def test_modify_string():
     c('a = "abc" a = "def"')
 
 
-@raises(TypeError)
+@raises(IncompatibleTypeError)
 def test_assign_string_to_numeric():
     c('a = 1 a = "abc"')
 
 
-@raises(TypeError)
+@raises(IncompatibleTypeError)
 def test_assign_bitfield_to_numeric():
     c("bitfield A x : 12 end a = 1 a = A(0)")
+
+
+@raises(InvalidExpressionError)
+def test_call_with_wrong_arg_count():
+    c("def f(a, b) end f(1)")

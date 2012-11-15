@@ -1,6 +1,5 @@
 from redux.autorepr import AutoRepr
 from redux.structeq import StructEq
-from redux.types import Type
 
 
 class ASTNode(AutoRepr, StructEq):
@@ -66,7 +65,7 @@ class FunctionDefinition(ASTNode):
         self.nontrivial = True
 
 
-class BitfieldDefinition(ASTNode, Type):
+class BitfieldDefinition(ASTNode):
     def __init__(self, name, members):
         self.name = name
         self.members = members
@@ -82,7 +81,7 @@ class BitfieldDefinition(ASTNode, Type):
         raise KeyError(member)
 
 
-class EnumDefinition(ASTNode, Type):
+class EnumDefinition(ASTNode):
     def __init__(self, name, members):
         self.name = name
         computed_members = []

@@ -243,11 +243,11 @@ class Parser(object):
 
     def p_achronal_field_ref_expr(self, p):
         "expression : achronal_field_ref"
-        p[0] = FunctionCall("__get_achronal_field", (p[1],))
+        p[0] = FunctionCall("__get_achronal_field", [p[1]])
 
     def p_achronal_field_assignment(self, p):
         "stmt : achronal_field_ref ASSIGN expression"
-        p[0] = FunctionCall("__set_achronal_field", (p[1], p[3]))
+        p[0] = FunctionCall("__set_achronal_field", [p[1], p[3]])
 
     def p_error(self, p):
         if p is None:
