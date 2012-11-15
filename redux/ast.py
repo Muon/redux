@@ -143,35 +143,35 @@ class RelationalOp(ASTNode):
     pass
 
 
-class LessThanOp(BinaryOp, RelationalOp):
+class LessThanOp(RelationalOp, BinaryOp):
     pass
 
 
-class GreaterThanOp(BinaryOp, RelationalOp):
+class GreaterThanOp(RelationalOp, BinaryOp):
     pass
 
 
-class LessThanOrEqualToOp(BinaryOp, RelationalOp):
+class LessThanOrEqualToOp(RelationalOp, BinaryOp):
     pass
 
 
-class GreaterThanOrEqualToOp(BinaryOp, RelationalOp):
+class GreaterThanOrEqualToOp(RelationalOp, BinaryOp):
     pass
 
 
-class EqualToOp(BinaryOp, RelationalOp):
+class EqualToOp(RelationalOp, BinaryOp):
     pass
 
 
-class NotEqualToOp(BinaryOp, RelationalOp):
+class NotEqualToOp(RelationalOp, BinaryOp):
     pass
 
 
-class LogicalAndOp(BinaryOp, RelationalOp):
+class LogicalAndOp(RelationalOp, BinaryOp):
     pass
 
 
-class LogicalOrOp(BinaryOp, RelationalOp):
+class LogicalOrOp(RelationalOp, BinaryOp):
     pass
 
 
