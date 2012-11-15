@@ -28,9 +28,6 @@ class ASTVisitor(Visitor):
     def visit_Block(self, block):
         self.push_scope()
 
-        for override in block.scope_overrides:
-            self.visit(override)
-
         for statement in block.statements:
             self.visit(statement)
 

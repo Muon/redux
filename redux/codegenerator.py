@@ -153,15 +153,6 @@ class CodeGenerator(ASTVisitor):
     def visit_Block(self, block):
         self.push_scope()
 
-        for assignment in block.scope_overrides:
-            old_length = len(self.code)
-            self.visit(assignment, True)
-            if old_length < len(self.code) and \
-               self.code[-1] != ";" and \
-               self.code[-2:] != "}\n":
-                self.emit(";\n")
-
-
         for statement in block.statements:
             old_length = len(self.code)
             self.visit(statement)

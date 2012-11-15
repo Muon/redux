@@ -7,11 +7,8 @@ class ASTNode(AutoRepr, StructEq):
 
 
 class Block(ASTNode):
-    def __init__(self, statements, scope_overrides=None):
+    def __init__(self, statements):
         self.statements = statements
-        if scope_overrides is None:
-            scope_overrides = []
-        self.scope_overrides = scope_overrides
 
 
 class FunctionCall(ASTNode):
@@ -35,9 +32,10 @@ class CodeLiteral(ASTNode):
 
 
 class Assignment(ASTNode):
-    def __init__(self, variable, expression):
+    def __init__(self, variable, expression, shadow=False):
         self.variable = variable
         self.expression = expression
+        self.shadow = shadow
 
 
 class BitfieldAssignment(Assignment):

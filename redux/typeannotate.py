@@ -114,10 +114,11 @@ class TypeAnnotator(ASTVisitor):
             raise InvalidExpressionError("expected %d arguments, got %d" % (len(func_def.arguments),
                                                                             len(func_call.arguments)))
 
-        func_def.block.scope_overrides = [Assignment(VarRef(name), value)
-                                          for name, value
-                                          in zip(func_def.arguments,
-                                                 func_call.arguments)]
+        shadowed_vars = [Assignment(VarRef(name), value, True)
+                         for name, value
+                         in zip(func_def.arguments, func_call.arguments)]
+        func_def.block.statements = shadowed_vars + func_def.block.statements
+
         real_scopes = self.scopes
         self.scopes = func_def.visible_scope
 
@@ -142,6 +143,9 @@ class TypeAnnotator(ASTVisitor):
         var_name = assignment.variable.name
 
         try:
+            if assignment.shadow is True:
+                raise KeyError
+
             type_, immutable, value = self.get_scope_entry(var_name)
 
             if not check_assignable(expr_type, type_):
