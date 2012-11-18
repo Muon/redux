@@ -134,16 +134,9 @@ class EnumDefinition(Stmt):
 class Constant(Expr):
     _fields = ["value", "type"]
 
-    def __init__(self, value, type_):
-        self.value = value
-        self.type = type_
-
 
 class VarRef(Expr):
     _fields = ["name"]
-
-    def __init__(self, name):
-        self.name = name
 
 
 class BitfieldAccess(Expr):
