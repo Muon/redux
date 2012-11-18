@@ -1,6 +1,7 @@
 from redux.types import str_
 from redux.visitor import ASTTransformer
 
+
 class StringInliner(ASTTransformer):
     """Inlines all string references."""
     def __init__(self):
@@ -21,7 +22,7 @@ class StringInliner(ASTTransformer):
         raise KeyError(name)
 
     def visit_BitfieldAssignment(self, bitfield_assignment):
-        return bitfield_assignment
+        return self.generic_visit(bitfield_assignment)
 
     def visit_VarRef(self, var_ref):
         try:

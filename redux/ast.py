@@ -14,7 +14,7 @@ class ASTNode(object):
     def fields(self):
         for field in self._fields:
             try:
-                yield getattr(self, field)
+                yield field, getattr(self, field)
             except AttributeError:
                 pass
 
@@ -33,6 +33,9 @@ class ASTNode(object):
         else:
             return False
 
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__, ", ".join(repr(getattr(self, name)) for name in self._fields))
+
 
 class Stmt(ASTNode):
     pass
@@ -46,7 +49,11 @@ class Block(Stmt):
     _fields = ["statements"]
 
 
-class FunctionCall(Expr, Stmt):
+class ExprStmt(Stmt):
+    _fields = ["expression"]
+
+
+class FunctionCall(Expr):
     _fields = ["function", "arguments"]
 
 

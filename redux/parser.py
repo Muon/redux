@@ -5,7 +5,7 @@ from redux.ast import (Block, Assignment, BitfieldAssignment, WhileStmt, IfStmt,
                        Constant, VarRef, BitfieldAccess, AddOp, SubOp, MulOp,
                        DivOp, EqualToOp, NotEqualToOp, GreaterThanOp,
                        GreaterThanOrEqualToOp, LessThanOp, LessThanOrEqualToOp,
-                       LogicalNotOp, LogicalAndOp, LogicalOrOp)
+                       LogicalNotOp, LogicalAndOp, LogicalOrOp, ExprStmt)
 from redux.lexer import Lexer
 from redux.types import str_, int_, float_
 
@@ -37,8 +37,7 @@ class Parser(object):
 
     def p_stmt(self, p):
         """
-        stmt : func_call
-             | assignment
+        stmt : assignment
              | if_stmt
              | while_stmt
              | func_def
@@ -48,6 +47,10 @@ class Parser(object):
              | enum_def
         """
         p[0] = p[1]
+
+    def p_stmt_func_call(self, p):
+        "stmt : func_call"
+        p[0] = ExprStmt(p[1])
 
     def p_func_call(self, p):
         "func_call : ID LPAREN arg_list RPAREN"
@@ -247,7 +250,7 @@ class Parser(object):
 
     def p_achronal_field_assignment(self, p):
         "stmt : achronal_field_ref ASSIGN expression"
-        p[0] = FunctionCall("__set_achronal_field", [p[1], p[3]])
+        p[0] = ExprStmt(FunctionCall("__set_achronal_field", [p[1], p[3]]))
 
     def p_error(self, p):
         if p is None:

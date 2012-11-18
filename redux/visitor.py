@@ -1,161 +1,72 @@
+from redux.ast import ASTNode
+
+
 class Visitor(object):
     "Implements the extrinsic Visitor pattern."
 
     def visit(self, node, *args, **kwargs):
         "Starts visiting node."
+        visitor = self.generic_visit
         for cls in node.__class__.__mro__:
             meth_name = 'visit_' + cls.__name__
-            meth = getattr(self, meth_name, None)
-            if meth:
-                return meth(node, *args, **kwargs)
+            try:
+                visitor = getattr(self, meth_name)
+                break
+            except AttributeError:
+                pass
 
-        return self.generic_visit(node, *args, **kwargs)
+        return visitor(node, *args, **kwargs)
 
 
 class ASTVisitor(Visitor):
+    def generic_visit(self, node):
+        """Called if no explicit visitor function exists for a node."""
+        print(node)
+        for name, value in node.fields():
+            print("\t%r %r" % (name, value))
+            if isinstance(value, list):
+                for item in value:
+                    if isinstance(item, ASTNode):
+                        self.visit(item)
+            elif isinstance(value, ASTNode):
+                self.visit(value)
+
     def push_scope(self):
         pass
 
     def pop_scope(self):
         pass
 
-    def generic_visit(self, node):
-        raise RuntimeError("non-AST node object %r visited" % node)
-
-    def visit_ASTNode(self, node):
-        assert False, "unhandled node in AST visitor: %r" % node
-
     def visit_Block(self, block):
         self.push_scope()
-
-        for statement in block.statements:
-            self.visit(statement)
-
+        self.generic_visit(block)
         self.pop_scope()
-
-        return block
-
-    def visit_Assignment(self, assignment):
-        self.visit(assignment.expression)
-        return assignment
-
-    def visit_FunctionCall(self, func_call):
-        for argument in func_call.arguments:
-            self.visit(argument)
-
-        return func_call
-
-    def visit_FunctionDefinition(self, func_def):
-        return func_def
-
-    def visit_BitfieldDefinition(self, bitfield_def):
-        return bitfield_def
-
-    def visit_EnumDefinition(self, enum_def):
-        return enum_def
-
-    def visit_BitfieldAccess(self, bitfield_access):
-        return bitfield_access
-
-    def visit_IfStmt(self, if_stmt):
-        self.visit(if_stmt.condition)
-        self.visit(if_stmt.then_block)
-
-        if if_stmt.else_part:
-            self.visit(if_stmt.else_part)
-
-        return if_stmt
-
-    def visit_BreakStmt(self, break_stmt):
-        return break_stmt
-
-    def visit_VarRef(self, var_ref):
-        return var_ref
-
-    def visit_WhileStmt(self, while_stmt):
-        self.visit(while_stmt.condition)
-        self.visit(while_stmt.block)
-
-        return while_stmt
-
-    def visit_ReturnStmt(self, return_stmt):
-        self.visit(return_stmt.expression)
-
-        return return_stmt
-
-    def visit_Constant(self, constant):
-        return constant
-
-    def visit_BinaryOp(self, node):
-        self.visit(node.lhs)
-        self.visit(node.rhs)
-
-        return node
-
-    def visit_LogicalNotOp(self, node):
-        self.visit(node.expression)
-
-        return node
-
-    def visit_CodeLiteral(self, code_literal):
-        return code_literal
 
 
 class ASTTransformer(ASTVisitor):
+    def generic_visit(self, node):
+        for name, old_value in node.fields():
+            old_value = getattr(node, name, None)
+            if isinstance(old_value, list):
+                new_values = []
+                for value in old_value:
+                    if isinstance(value, ASTNode):
+                        value = self.visit(value)
+                        if value is None:
+                            continue
+                        elif not isinstance(value, ASTNode):
+                            new_values.extend(value)
+                            continue
+                    new_values.append(value)
+                old_value[:] = new_values
+            elif isinstance(old_value, ASTNode):
+                new_node = self.visit(old_value)
+                if new_node is None:
+                    delattr(node, name)
+                else:
+                    setattr(node, name, new_node)
+        return node
+
     def visit_Block(self, block):
-        self.push_scope()
-
-        new_statements = []
-
-        for i, statement in enumerate(block.statements):
-            new_statement = self.visit(statement)
-
-            if new_statement is not None:
-                new_statements.append(new_statement)
-
-        block.statements = new_statements
-
-        self.pop_scope()
-
+        super(ASTTransformer, self).visit_Block(block)
         return block
-
-    def visit_Assignment(self, assignment):
-        assignment.expression = self.visit(assignment.expression)
-        return assignment
-
-    def visit_FunctionCall(self, func_call):
-        for i, argument in enumerate(func_call.arguments):
-            func_call.arguments[i] = self.visit(argument)
-
-        return func_call
-
-    def visit_IfStmt(self, if_stmt):
-        if_stmt.condition = self.visit(if_stmt.condition)
-        if_stmt.then_block = self.visit(if_stmt.then_block)
-
-        if if_stmt.else_part:
-            if_stmt.else_part = self.visit(if_stmt.else_part)
-
-        return if_stmt
-
-    def visit_WhileStmt(self, while_stmt):
-        while_stmt.condition = self.visit(while_stmt.condition)
-        while_stmt.block = self.visit(while_stmt.block)
-
-        return while_stmt
-
-    def visit_ReturnStatement(self, return_stmt):
-        return_stmt.expression = self.visit(return_stmt.expression)
-
-        return return_stmt
-
-    def visit_BinaryOp(self, node):
-        node.lhs = self.visit(node.lhs)
-        node.rhs = self.visit(node.rhs)
-
-        return node
-
-    def visit_LogicalNotOp(self, node):
-        self.visit(node.expression)
-
-        return node

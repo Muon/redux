@@ -3,7 +3,7 @@ from copy import deepcopy
 from redux.ast import FunctionDefinition, BitfieldDefinition, ReturnStmt, Assignment, VarRef
 from redux.intrinsics import IntrinsicFunction, SayFunction, SqrtFunction, GetAchronalField, SetAchronalField
 from redux.types import is_numeric, common_arithmetic_type, check_assignable, int_, float_, str_
-from redux.visitor import ASTVisitor
+from redux.visitor import ASTTransformer
 
 
 ScopeEntry = namedtuple("ScopeEntry", ("type", "immutable", "value"))
@@ -32,7 +32,8 @@ class InvalidExpressionError(TypeError):
 class ImmutabilityViolationError(TypeError):
     pass
 
-class TypeAnnotator(ASTVisitor):
+
+class TypeAnnotator(ASTTransformer):
     """Annotates AST with type information."""
     def __init__(self):
         super(TypeAnnotator, self).__init__()
@@ -66,33 +67,40 @@ class TypeAnnotator(ASTVisitor):
 
     def visit_VarRef(self, var_ref):
         var_ref.type = self.get_variable_type(var_ref.name)
+        return var_ref
 
     def visit_BitfieldAccess(self, bitfield_access):
-        self.visit(bitfield_access.variable)
+        bitfield_access = self.generic_visit(bitfield_access)
         bitfield_access.variable.type.get_member_limits(bitfield_access.member)
         bitfield_access.type = int_
+        return bitfield_access
 
     def visit_BitfieldAssignment(self, bitfield_assignment):
-        self.visit(bitfield_assignment.variable)
-        self.visit(bitfield_assignment.expression)
+        bitfield_assignment = self.generic_visit(bitfield_assignment)
 
         if bitfield_assignment.expression.type != int_:
             raise IncompatibleTypeError(bitfield_assignment.expression.type)
 
+        return bitfield_assignment
+
     def visit_FunctionDefinition(self, function_def):
         function_def.visible_scope = self.scopes[:]
-        self.scopes[-1][function_def.name] = ScopeEntry(FunctionDefinition, True, function_def)
+        self.scopes[-1][function_def.name] = ScopeEntry(
+            FunctionDefinition, True, function_def)
+        return function_def
 
     def visit_BitfieldDefinition(self, bitfield_def):
-        self.scopes[-1][bitfield_def.name] = ScopeEntry(BitfieldDefinition, True, bitfield_def)
+        self.scopes[-1][bitfield_def.name] = ScopeEntry(
+            BitfieldDefinition, True, bitfield_def)
+        return bitfield_def
 
     def visit_EnumDefinition(self, enum_def):
         for name, value in enum_def.members:
             self.scopes[-1][name] = ScopeEntry(int_, True, value)
+        return enum_def
 
     def visit_FunctionCall(self, func_call):
-        for argument in func_call.arguments:
-            self.visit(argument)
+        func_call = self.generic_visit(func_call)
 
         entry = self.get_scope_entry(func_call.function)
 
@@ -106,36 +114,38 @@ class TypeAnnotator(ASTVisitor):
                 func_call.func_def.nontrivial = False
             else:
                 raise NotCallableError(func_call.function)
-            return
+            return func_call
 
         func_def = deepcopy(entry.value)
 
         if len(func_call.arguments) != len(func_def.arguments):
-            raise InvalidExpressionError("expected %d arguments, got %d" % (len(func_def.arguments),
-                                                                            len(func_call.arguments)))
+            raise InvalidExpressionError(
+                "expected %d arguments, got %d" % (len(func_def.arguments),
+                                                   len(func_call.arguments)))
 
         shadowed_vars = [Assignment(VarRef(name), value, True)
                          for name, value
                          in zip(func_def.arguments, func_call.arguments)]
-        func_def.block.statements = shadowed_vars + func_def.block.statements
+        new_statements = shadowed_vars + func_def.block.statements
+        func_def.block.statements = new_statements
 
         real_scopes = self.scopes
         self.scopes = func_def.visible_scope
 
-        self.visit(func_def.block)
+        func_def.block = self.visit(func_def.block)
 
-        if func_def.block.statements and \
-           isinstance(func_def.block.statements[-1], ReturnStmt):
-            func_call.type = func_def.block.statements[-1].expression.type
+        if new_statements and isinstance(new_statements[-1], ReturnStmt):
+            func_call.type = new_statements[-1].expression.type
         else:
             func_call.type = None
 
         self.scopes = real_scopes
 
         func_call.func_def = func_def
+        return func_call
 
     def visit_Assignment(self, assignment):
-        self.visit(assignment.expression)
+        assignment.expression = self.visit(assignment.expression)
         expr_type = assignment.expression.type
         if expr_type is None:
             raise UndefinedTypeError(assignment.expression)
@@ -160,28 +170,25 @@ class TypeAnnotator(ASTVisitor):
             else:
                 self.scopes[-1][var_name] = ScopeEntry(expr_type, False, None)
 
+        return assignment
+
     def visit_BinaryOp(self, binop):
-        self.visit(binop.lhs)
-        self.visit(binop.rhs)
+        binop = self.generic_visit(binop)
 
         if is_numeric(binop.lhs.type) and is_numeric(binop.rhs.type):
             binop.type = common_arithmetic_type(binop.lhs.type, binop.rhs.type)
         else:
             raise InvalidExpressionError(binop)
 
+        return binop
+
     def visit_RelationalOp(self, relop):
-        self.visit(relop.lhs)
-        self.visit(relop.rhs)
+        relop = self.generic_visit(relop)
 
-        if is_numeric(relop.lhs.type) and is_numeric(relop.rhs.type):
-            relop.type = int_
-        else:
-            raise InvalidExpressionError(relop)
+        for child in relop.children():
+            if not is_numeric(child.type):
+                raise InvalidExpressionError(relop)
 
-    def visit_LogicalNotOp(self, lnotop):
-        self.visit(lnotop.expression)
+        relop.type = int_
 
-        if is_numeric(lnotop.expression.type):
-            lnotop.type = int_
-        else:
-            raise InvalidExpressionError(lnotop)
+        return relop

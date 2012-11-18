@@ -3,6 +3,7 @@ from redux.ast import (Block, FunctionDefinition, CodeLiteral, ReturnStmt,
                        VarRef)
 from redux.types import float_, is_numeric
 
+
 class IntrinsicFunction(AutoRepr):
     @property
     def nontrivial(self):
