@@ -1,10 +1,9 @@
-from redux.autorepr import AutoRepr
 from redux.ast import (Block, FunctionDefinition, CodeLiteral, ReturnStmt,
                        VarRef)
 from redux.types import float_, is_numeric
 
 
-class IntrinsicFunction(AutoRepr):
+class IntrinsicFunction(object):
     @property
     def nontrivial(self):
         return False
