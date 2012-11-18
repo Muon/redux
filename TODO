@@ -7,7 +7,7 @@ Feature parity:
  ☐ object fields
  ☐ Other intrinsic functions (max, min, dist, distSq, sin, cos, tan, etc.)
 AST:
- ☐ Rewrite AST nodes using collections.namedtuple
+ ✔ Rewrite AST nodes @done (2012-11-18 15:31)
  ☐ Simplify visitors
 Code generator:
  ✔ Refactor code generation into multiple passes @done (2012-11-15 20:20)
