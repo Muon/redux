@@ -143,9 +143,14 @@ class CodeGenerator(ASTVisitor):
         self.emit(" = ")
         self.visit(assignment.expression)
 
-    def visit_BitfieldAccess(self, bitfield_access):
-        self.visit(bitfield_access.variable)
-        self.emit("[%d, %d]" % bitfield_access.variable.type.get_member_limits(bitfield_access.member))
+    def visit_DottedAccess(self, dotted_access):
+        if dotted_access.expression.type == object_:
+            self.emit("(")
+            self.visit(dotted_access.expression)
+            self.emit(".%s)" % dotted_access.member)
+        else:
+            self.visit(dotted_access.expression)
+            self.emit("[%d, %d]" % dotted_access.expression.type.get_member_limits(dotted_access.member))
 
     def visit_EnumDefinition(self, enum_definition):
         for name, value in enum_definition.members:

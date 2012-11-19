@@ -112,3 +112,25 @@ CHRONAL_ATTRS = frozenset([
     "Objective",
     "AdditionalParameters",
 ])
+
+ACHRONAL_ATTRS = frozenset([
+    "Rank",
+    "Type",
+    "MaxHP",
+    "MaxEnergy",
+    "MaxArmour",
+    "MaxAmmo",
+    "SightVRange",
+    "SightVRange2",
+    "SightHRange",
+    "SightHRange2",
+    "Flags",
+    "Length",
+    "Size",
+    "CarryingCapacity",
+    "MaxAttackAngle",
+    "TicksToTurn45Degrees",
+
+    # Only for player units
+    "ScenarioConstraints",
+])

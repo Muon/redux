@@ -139,8 +139,8 @@ class VarRef(Expr):
     _fields = ["name"]
 
 
-class BitfieldAccess(Expr):
-    _fields = ["variable", "member"]
+class DottedAccess(Expr):
+    _fields = ["expression", "member"]
 
 
 class ChronalAccess(Expr):

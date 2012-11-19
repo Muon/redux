@@ -4,7 +4,7 @@ from redux.ast import FunctionDefinition, BitfieldDefinition, ReturnStmt, Assign
 from redux.intrinsics import IntrinsicFunction, SayFunction, SqrtFunction, GetAchronalField, SetAchronalField
 from redux.types import is_numeric, common_arithmetic_type, check_assignable, int_, float_, str_, object_
 from redux.visitor import ASTTransformer
-from redux.objectattributes import CHRONAL_ATTRS
+from redux.objectattributes import CHRONAL_ATTRS, ACHRONAL_ATTRS
 
 
 ScopeEntry = namedtuple("ScopeEntry", ("type", "immutable", "value"))
@@ -71,11 +71,17 @@ class TypeAnnotator(ASTTransformer):
         var_ref.type = self.get_variable_type(var_ref.name)
         return var_ref
 
-    def visit_BitfieldAccess(self, bitfield_access):
-        bitfield_access = self.generic_visit(bitfield_access)
-        bitfield_access.variable.type.get_member_limits(bitfield_access.member)
-        bitfield_access.type = int_
-        return bitfield_access
+    def visit_DottedAccess(self, dotted_access):
+        dotted_access = self.generic_visit(dotted_access)
+
+        if dotted_access.expression.type == object_:
+            if dotted_access.member not in ACHRONAL_ATTRS:
+                raise InvalidExpressionError(dotted_access)
+        else:
+            dotted_access.expression.type.get_member_limits(dotted_access.member)
+
+        dotted_access.type = int_
+        return dotted_access
 
     def visit_BitfieldAssignment(self, bitfield_assignment):
         bitfield_assignment = self.generic_visit(bitfield_assignment)

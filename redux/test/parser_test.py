@@ -1,7 +1,7 @@
 from nose.tools import eq_
 from redux.ast import (Block, Assignment, WhileStmt, IfStmt, FunctionCall,
                        BreakStmt, ReturnStmt, CodeLiteral, BitfieldDefinition,
-                       EnumDefinition, BitfieldAccess, BitfieldAssignment,
+                       EnumDefinition, DottedAccess, BitfieldAssignment,
                        FunctionDefinition, Constant, VarRef, AddOp, EqualToOp,
                        GreaterThanOp, LogicalNotOp, ChronalAccess)
 from redux.parser import parse
@@ -25,7 +25,7 @@ def test_valid_parses():
         ("def f(a, b) end", Block([FunctionDefinition("f", ["a", "b"], Block([]))])),
         ("a = (b)", Block([Assignment(VarRef("a"), VarRef("b"))])),
         ("bitfield A x : 8 y : 8 end", Block([BitfieldDefinition("A", [("x", 8), ("y", 8)])])),
-        ("a.x = 0", Block([BitfieldAssignment(BitfieldAccess(VarRef("a"), "x"), Constant(0, int_))])),
+        ("a.x = 0", Block([BitfieldAssignment(DottedAccess(VarRef("a"), "x"), Constant(0, int_))])),
         ("a = not a", Block([Assignment(VarRef("a"), LogicalNotOp(VarRef("a")))])),
         ("enum X a b end", Block([EnumDefinition('X', [('a', 0), ('b', 1)])])),
         ("enum X a = 1 b end", Block([EnumDefinition('X', [('a', 1), ('b', 2)])])),

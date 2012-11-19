@@ -2,7 +2,7 @@ from ply import yacc
 from redux.ast import (Block, Assignment, BitfieldAssignment, WhileStmt, IfStmt,
                        FunctionCall, BreakStmt, ReturnStmt, CodeLiteral,
                        BitfieldDefinition, EnumDefinition, FunctionDefinition,
-                       Constant, VarRef, BitfieldAccess, AddOp, SubOp, MulOp,
+                       Constant, VarRef, DottedAccess, AddOp, SubOp, MulOp,
                        DivOp, EqualToOp, NotEqualToOp, GreaterThanOp,
                        GreaterThanOrEqualToOp, LessThanOp, LessThanOrEqualToOp,
                        LogicalNotOp, LogicalAndOp, LogicalOrOp, ExprStmt,
@@ -63,7 +63,7 @@ class Parser(object):
 
     def p_bitfield_assignment(self, p):
         "assignment : variable DOT ID ASSIGN expression"
-        p[0] = BitfieldAssignment(BitfieldAccess(p[1], p[3]), p[5])
+        p[0] = BitfieldAssignment(DottedAccess(p[1], p[3]), p[5])
 
     def p_assignment_error(self, p):
         "assignment : variable ASSIGN error"
@@ -217,9 +217,9 @@ class Parser(object):
         "bitfield_def : BITFIELD ID bitfield_member_list END"
         p[0] = BitfieldDefinition(p[2], p[3])
 
-    def p_expression_bitfield_access(self, p):
+    def p_expression_dotted_access(self, p):
         "expression : expression DOT ID"
-        p[0] = BitfieldAccess(p[1], p[3])
+        p[0] = DottedAccess(p[1], p[3])
 
     def p_enum_def(self, p):
         "enum_def : ENUM ID enum_member_list END"
