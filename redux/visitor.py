@@ -21,9 +21,7 @@ class Visitor(object):
 class ASTVisitor(Visitor):
     def generic_visit(self, node):
         """Called if no explicit visitor function exists for a node."""
-        print(node)
         for name, value in node.fields():
-            print("\t%r %r" % (name, value))
             if isinstance(value, list):
                 for item in value:
                     if isinstance(item, ASTNode):
