@@ -62,8 +62,8 @@ class Parser(object):
         p[0] = Assignment(p[1], p[3])
 
     def p_bitfield_assignment(self, p):
-        "assignment : bitfield_access ASSIGN expression"
-        p[0] = BitfieldAssignment(p[1], p[3])
+        "assignment : variable DOT ID ASSIGN expression"
+        p[0] = BitfieldAssignment(BitfieldAccess(p[1], p[3]), p[5])
 
     def p_assignment_error(self, p):
         "assignment : variable ASSIGN error"
@@ -148,10 +148,6 @@ class Parser(object):
         "expression : func_call"
         p[0] = p[1]
 
-    def p_expression_bitfield_access(self, p):
-        "expression : bitfield_access"
-        p[0] = p[1]
-
     def p_expression_paren(self, p):
         "expression : LPAREN expression RPAREN"
         p[0] = p[2]
@@ -221,8 +217,8 @@ class Parser(object):
         "bitfield_def : BITFIELD ID bitfield_member_list END"
         p[0] = BitfieldDefinition(p[2], p[3])
 
-    def p_bitfield_access(self, p):
-        "bitfield_access : variable DOT ID"
+    def p_expression_bitfield_access(self, p):
+        "expression : expression DOT ID"
         p[0] = BitfieldAccess(p[1], p[3])
 
     def p_enum_def(self, p):
