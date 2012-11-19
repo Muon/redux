@@ -2,8 +2,9 @@ from collections import namedtuple
 from copy import deepcopy
 from redux.ast import FunctionDefinition, BitfieldDefinition, ReturnStmt, Assignment, VarRef
 from redux.intrinsics import IntrinsicFunction, SayFunction, SqrtFunction, GetAchronalField, SetAchronalField
-from redux.types import is_numeric, common_arithmetic_type, check_assignable, int_, float_, str_
+from redux.types import is_numeric, common_arithmetic_type, check_assignable, int_, float_, str_, object_
 from redux.visitor import ASTTransformer
+from redux.objectattributes import CHRONAL_ATTRS
 
 
 ScopeEntry = namedtuple("ScopeEntry", ("type", "immutable", "value"))
@@ -41,6 +42,7 @@ class TypeAnnotator(ASTTransformer):
             {
                 "perf_ret": ScopeEntry(int_, False, None),
                 "perf_ret_float": ScopeEntry(float_, False, None),
+                "unit": ScopeEntry(object_, False, None),
                 "say": ScopeEntry(IntrinsicFunction, True, SayFunction()),
                 "sqrt": ScopeEntry(IntrinsicFunction, True, SqrtFunction())
             }
@@ -192,3 +194,13 @@ class TypeAnnotator(ASTTransformer):
         relop.type = int_
 
         return relop
+
+    def visit_ChronalAccess(self, chronal_access):
+        chronal_access = self.generic_visit(chronal_access)
+        if (chronal_access.object.type != object_ or
+            chronal_access.member not in CHRONAL_ATTRS):
+            raise InvalidExpressionError(chronal_access)
+
+        chronal_access.type = int_
+
+        return chronal_access

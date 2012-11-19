@@ -39,6 +39,7 @@ def test_code_generation():
         ("AF[0] = 1", "{\nint num = 0;\nint value = 1;\ntarget = num; PERFORM SET_ACHRONAL_FIELD value;}"),
         ("a = AF[0]", "int __retval0 = 0;\n{\nint num = 0;\nPERFORM GET_ACHRONAL_FIELD num;__retval0 = perf_ret;\n}\nint a = __retval0;"),
         ("def f() return sqrt(1) end f()", "float __retval0 = 0;\n{\n__retval0 = (|/1);\n}\n__retval0;"),
+        ("say(unit->Timestamp)", "say (unit->Timestamp);"),
     ]
 
     for redux_code, rescript_code in code_examples:

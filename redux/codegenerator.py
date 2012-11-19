@@ -19,6 +19,7 @@ class CodeGenerator(ASTVisitor):
         super(CodeGenerator, self).__init__()
         self.scopes = [
             {
+                "unit": ScopeEntry(object_, False, None),
                 "perf_ret": ScopeEntry(int_, False, None),
                 "perf_ret_float": ScopeEntry(float_, False, None),
             }
@@ -181,6 +182,11 @@ class CodeGenerator(ASTVisitor):
 
     def visit_BreakStmt(self, break_stmt):
         self.emit("break")
+
+    def visit_ChronalAccess(self, chronal_access):
+        self.emit("(")
+        self.visit(chronal_access.object)
+        self.emit("->%s)" % chronal_access.member)
 
 
 def compile_script(filename, code):

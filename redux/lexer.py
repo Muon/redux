@@ -54,7 +54,8 @@ class Lexer(object):
         'ASSIGN',
         'CODELITERAL',
         'LBRACKET',
-        'RBRACKET'
+        'RBRACKET',
+        'ARROW',
     ) + tuple(reserved.values())
 
     t_LPAREN = r'\('
@@ -75,6 +76,7 @@ class Lexer(object):
     t_COLON = r':'
     t_LBRACKET = r'\['
     t_RBRACKET = r'\]'
+    t_ARROW = r'->'
 
     t_ignore_COMMENT = r'\#.*'
 

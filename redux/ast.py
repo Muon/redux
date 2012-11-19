@@ -143,6 +143,10 @@ class BitfieldAccess(Expr):
     _fields = ["variable", "member"]
 
 
+class ChronalAccess(Expr):
+    _fields = ["object", "member"]
+
+
 class BinaryOp(Expr):
     _fields = ["lhs", "rhs"]
 

@@ -5,7 +5,8 @@ from redux.ast import (Block, Assignment, BitfieldAssignment, WhileStmt, IfStmt,
                        Constant, VarRef, BitfieldAccess, AddOp, SubOp, MulOp,
                        DivOp, EqualToOp, NotEqualToOp, GreaterThanOp,
                        GreaterThanOrEqualToOp, LessThanOp, LessThanOrEqualToOp,
-                       LogicalNotOp, LogicalAndOp, LogicalOrOp, ExprStmt)
+                       LogicalNotOp, LogicalAndOp, LogicalOrOp, ExprStmt,
+                       ChronalAccess)
 from redux.lexer import Lexer
 from redux.types import str_, int_, float_
 
@@ -154,6 +155,10 @@ class Parser(object):
     def p_expression_paren(self, p):
         "expression : LPAREN expression RPAREN"
         p[0] = p[2]
+
+    def p_expression_chronal_access(self, p):
+        "expression : expression ARROW ID"
+        p[0] = ChronalAccess(p[1], p[3])
 
     precedence = (
         ('nonassoc', 'LT', 'GT', 'LTE', 'GTE', 'EQ', 'NEQ'),
