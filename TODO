@@ -4,7 +4,7 @@ Feature parity:
  ☐ For loops
  ☐ Bitwise operators
  ☐ QUERY expressions
- ☐ object fields
+ ✔ object fields @done (2012-11-19 15:36)
  ☐ Other intrinsic functions (max, min, dist, distSq, sin, cos, tan, etc.)
 AST:
  ✔ Rewrite AST nodes @done (2012-11-18 15:31)

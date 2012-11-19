@@ -193,6 +193,11 @@ class CodeGenerator(ASTVisitor):
         self.visit(chronal_access.object)
         self.emit("->%s)" % chronal_access.member)
 
+    def visit_ClassAccess(self, class_access):
+        self.emit("(")
+        self.visit(class_access.class_)
+        self.emit("::%s)" % class_access.member)
+
 
 def compile_script(filename, code):
     code_generator = CodeGenerator()

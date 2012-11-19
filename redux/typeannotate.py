@@ -210,3 +210,13 @@ class TypeAnnotator(ASTTransformer):
         chronal_access.type = int_
 
         return chronal_access
+
+    def visit_ClassAccess(self, class_access):
+        class_access = self.generic_visit(class_access)
+        if (class_access.class_.type != int_ or
+            class_access.member not in ACHRONAL_ATTRS):
+            raise InvalidExpressionError(class_access)
+
+        class_access.type = int_
+
+        return class_access
