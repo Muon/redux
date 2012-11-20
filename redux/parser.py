@@ -161,12 +161,13 @@ class Parser(object):
         p[0] = ClassAccess(p[1], p[3])
 
     precedence = (
-        ('nonassoc', 'LT', 'GT', 'LTE', 'GTE', 'EQ', 'NEQ'),
         ('left', 'LOR'),
         ('left', 'LAND'),
         ('right', 'LNOT'),
+        ('nonassoc', 'LT', 'GT', 'LTE', 'GTE', 'EQ', 'NEQ', 'EQ', 'NEQ'),
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIVIDE'),
+        ('left', 'ARROW', 'DOT', 'DOUBLECOL')
     )
 
     def p_lnot(self, p):

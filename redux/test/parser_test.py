@@ -3,7 +3,8 @@ from redux.ast import (Block, Assignment, WhileStmt, IfStmt, FunctionCall,
                        BreakStmt, ReturnStmt, CodeLiteral, BitfieldDefinition,
                        EnumDefinition, DottedAccess, BitfieldAssignment,
                        FunctionDefinition, Constant, VarRef, AddOp, EqualToOp,
-                       GreaterThanOp, LogicalNotOp, ChronalAccess, ClassAccess)
+                       GreaterThanOp, LogicalNotOp, ChronalAccess, ClassAccess,
+                       LogicalAndOp)
 from redux.parser import parse
 from redux.types import int_, str_
 
@@ -31,6 +32,7 @@ def test_valid_parses():
         ("enum X a = 1 b end", Block([EnumDefinition('X', [('a', 1), ('b', 2)])])),
         ("a = unit->Timestamp", Block([Assignment(VarRef("a"), ChronalAccess(VarRef("unit"), "Timestamp"))])),
         ("a = 1::Rank", Block([Assignment(VarRef("a"), ClassAccess(Constant(1, int_), "Rank"))])),
+        ("a = 2 > 0 and 1 > 0", Block([Assignment(VarRef('a'), LogicalAndOp(GreaterThanOp(Constant(2, 'int,'), Constant(0, 'int,')), GreaterThanOp(Constant(1, 'int,'), Constant(0, 'int,'))), False)])),
     ]
 
     for code, ast_ in valid_parses:
