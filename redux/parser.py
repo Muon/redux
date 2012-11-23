@@ -6,7 +6,7 @@ from redux.ast import (Block, Assignment, BitfieldAssignment, WhileStmt, IfStmt,
                        DivOp, EqualToOp, NotEqualToOp, GreaterThanOp,
                        GreaterThanOrEqualToOp, LessThanOp, LessThanOrEqualToOp,
                        LogicalNotOp, LogicalAndOp, LogicalOrOp, ExprStmt,
-                       ChronalAccess, ClassAccess)
+                       ChronalAccess, ClassAccess, Query)
 from redux.lexer import Lexer
 from redux.types import str_, int_, float_
 
@@ -19,7 +19,7 @@ class Parser(object):
 
     def parse(self, code):
         self.errors = []
-        return self._parser.parse(code, lexer=Lexer()), self.errors
+        return self._parser.parse(code, lexer=Lexer(), debug=0), self.errors
 
     def error(self, lineno, message):
         self.errors.append((lineno, message))
@@ -164,7 +164,7 @@ class Parser(object):
         ('left', 'LOR'),
         ('left', 'LAND'),
         ('right', 'LNOT'),
-        ('nonassoc', 'LT', 'GT', 'LTE', 'GTE', 'EQ', 'NEQ', 'EQ', 'NEQ'),
+        ('nonassoc', 'LT', 'GT', 'LTE', 'GTE', 'EQ', 'NEQ'),
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIVIDE'),
         ('left', 'ARROW', 'DOT', 'DOUBLECOL')
@@ -257,6 +257,54 @@ class Parser(object):
     def p_achronal_field_assignment(self, p):
         "stmt : achronal_field_ref ASSIGN expression"
         p[0] = ExprStmt(FunctionCall("__set_achronal_field", [p[1], p[3]]))
+
+    def p_active_unit(self, p):
+        "active_unit : expression"
+        p[0] = p[1]
+
+    def p_active_unit_empty(self, p):
+        "active_unit : empty"
+        p[0] = VarRef("unit")
+
+    def p_where_part(self, p):
+        "where_part : WHERE expression"
+        p[0] = p[2]
+
+    def p_where_part_empty(self, p):
+        "where_part : empty"
+        p[0] = Constant(1, int_)
+
+    def p_value_query_op_type(self, p):
+        """
+        value_query_op_type : MAX
+                            | MIN
+                            | SUM
+                            | AVE
+        """
+        p[0] = p[1]
+
+    def p_unit_query_op_type(self, p):
+        """
+        unit_query_op_type : MAX
+                           | MIN
+        """
+        p[0] = p[1]
+
+    def p_value_query(self, p):
+        "expression : LPAREN QUERY VALUE active_unit value_query_op_type expression where_part RPAREN"
+        p[0] = Query(p[3], p[4], p[5], p[6], p[7])
+
+    def p_unit_query(self, p):
+        "expression : LPAREN QUERY UNIT active_unit unit_query_op_type expression where_part RPAREN"
+        p[0] = Query(p[3], p[4], p[5], p[6], p[7])
+
+    def p_unit_query_criterionless(self, p):
+        "expression : LPAREN QUERY UNIT active_unit WHERE expression RPAREN"
+        p[0] = Query(p[3], p[4], "MIN", Constant(1, int_), p[6])
+
+    def p_bestmove_query(self, p):
+        "expression : LPAREN QUERY BESTMOVE active_unit MIN expression where_part RPAREN"
+        p[0] = Query(p[3], p[4], p[5], p[6], p[7])
 
     def p_error(self, p):
         if p is None:

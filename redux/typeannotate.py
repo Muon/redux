@@ -3,7 +3,7 @@ from copy import deepcopy
 from redux.ast import FunctionDefinition, BitfieldDefinition, ReturnStmt, Assignment, VarRef
 from redux.intrinsics import IntrinsicFunction, SayFunction, SqrtFunction, GetAchronalField, SetAchronalField
 from redux.types import is_numeric, common_arithmetic_type, check_assignable, int_, float_, str_, object_
-from redux.visitor import ASTTransformer
+from redux.visitor import ASTTransformer, ASTVisitor
 from redux.objectattributes import CHRONAL_ATTRS, ACHRONAL_ATTRS
 
 
@@ -42,6 +42,7 @@ class TypeAnnotator(ASTTransformer):
             {
                 "perf_ret": ScopeEntry(int_, False, None),
                 "perf_ret_float": ScopeEntry(float_, False, None),
+                "query": ScopeEntry(object_, False, None),
                 "unit": ScopeEntry(object_, False, None),
                 "say": ScopeEntry(IntrinsicFunction, True, SayFunction()),
                 "sqrt": ScopeEntry(IntrinsicFunction, True, SqrtFunction())
@@ -220,3 +221,29 @@ class TypeAnnotator(ASTTransformer):
         class_access.type = int_
 
         return class_access
+
+    def visit_Query(self, query):
+        class BestMoveEliminator(ASTVisitor):
+            def visit_Query(self, node):
+                if node.type == "BESTMOVE":
+                    raise InvalidExpressionError("QUERY BESTMOVE as subquery")
+
+        for child in query.children():
+            BestMoveEliminator().visit(child)
+
+        self.generic_visit(query)
+
+        if not is_numeric(query.op_expr.type):
+            raise InvalidExpressionError(
+                "operation clause has invalid type %s" % query.op_expr.type)
+
+        if not is_numeric(query.where_cond.type):
+            raise InvalidExpressionError(
+                "WHERE clause has invalid type %s" % query.where_cond.type)
+
+        if query.query_type == "UNIT":
+            query.type = object_
+        else:
+            query.type = int_
+
+        return query

@@ -27,7 +27,16 @@ class Lexer(object):
         "break": "BREAK",
         "bitfield": "BITFIELD",
         "enum": "ENUM",
-        "AF": "AF"
+        "AF": "AF",
+        "QUERY": "QUERY",
+        "WHERE": "WHERE",
+        "VALUE": "VALUE",
+        "UNIT": "UNIT",
+        "BESTMOVE": "BESTMOVE",
+        "MIN": "MIN",
+        "MAX": "MAX",
+        "AVE": "AVE",
+        "SUM": "SUM",
     }
 
     tokens = (

@@ -41,7 +41,9 @@ def test_code_generation():
         ("def f() return sqrt(1) end f()", "float __retval0 = 0;\n{\n__retval0 = (|/1);\n}\n__retval0;"),
         ("say(unit->Timestamp)", "say (unit->Timestamp);"),
         ("say(unit.Length)", "say (unit.Length);"),
-        ("say(1::Rank)", "say (1::Rank);")
+        ("say(1::Rank)", "say (1::Rank);"),
+        ("a = (QUERY UNIT WHERE query->HP > 0)", "object a = (QUERY UNIT [unit] MIN [1] WHERE [((query->HP)>0)]);"),
+        ("a = (QUERY VALUE MIN query->HP)", "int a = (QUERY VALUE [unit] MIN [(query->HP)] WHERE [1]);"),
     ]
 
     for redux_code, rescript_code in code_examples:

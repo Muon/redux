@@ -20,6 +20,7 @@ class CodeGenerator(ASTVisitor):
         self.scopes = [
             {
                 "unit": ScopeEntry(object_, False, None),
+                "query": ScopeEntry(object_, False, None),
                 "perf_ret": ScopeEntry(int_, False, None),
                 "perf_ret_float": ScopeEntry(float_, False, None),
             }
@@ -197,6 +198,16 @@ class CodeGenerator(ASTVisitor):
         self.emit("(")
         self.visit(class_access.class_)
         self.emit("::%s)" % class_access.member)
+
+    def visit_Query(self, query):
+        self.emit("(")
+        self.emit("QUERY %s [" % query.query_type)
+        self.visit(query.unit)
+        self.emit("] %s [" % query.op)
+        self.visit(query.op_expr)
+        self.emit("] WHERE [")
+        self.visit(query.where_cond)
+        self.emit("])")
 
 
 def compile_script(filename, code):

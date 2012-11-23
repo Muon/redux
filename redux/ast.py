@@ -146,8 +146,14 @@ class DottedAccess(Expr):
 class ChronalAccess(Expr):
     _fields = ["object", "member"]
 
+
 class ClassAccess(Expr):
     _fields = ["class_", "member"]
+
+
+class Query(Expr):
+    _fields = ["query_type", "unit", "op", "op_expr", "where_cond"]
+
 
 class BinaryOp(Expr):
     _fields = ["lhs", "rhs"]
