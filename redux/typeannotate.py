@@ -179,6 +179,8 @@ class TypeAnnotator(ASTTransformer):
             else:
                 self.scopes[-1][var_name] = ScopeEntry(expr_type, False, None)
 
+        assignment.variable = self.visit(assignment.variable)
+
         return assignment
 
     def visit_BinaryOp(self, binop):

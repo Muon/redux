@@ -14,7 +14,7 @@ class CallInliner(ASTTransformer):
     def allocate_temporary(self, type_):
         temporary = VarRef("__retval%d" % self.return_value_counter)
         temporary.type = type_
-        self.prepend_stmt(Assignment(temporary, Constant(0, type_)))
+        self.prepend_stmt(Assignment(temporary, Constant(0, type_), True))
         self.return_value_counter += 1
         return temporary
 

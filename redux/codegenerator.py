@@ -1,5 +1,6 @@
 import sys
 from collections import namedtuple
+from redux.assignmentshadow import AssignmentScopeAnalyzer
 from redux.ast import Constant, BitfieldDefinition
 from redux.callinliner import CallInliner
 from redux.intrinsics import SayFunction, SqrtFunction
@@ -128,15 +129,12 @@ class CodeGenerator(ASTVisitor):
         self.emit(" = ")
         self.visit(assignment.expression)
 
-    def visit_Assignment(self, assignment, shadow=False):
+    def visit_Assignment(self, assignment):
         var_name = assignment.variable.name
         expr_type = assignment.expression.type
+        var_type = assignment.variable.type
 
-        try:
-            entry = self.get_scope_entry(var_name)
-            var_type = entry.type
-        except KeyError:
-            var_type = expr_type
+        if assignment.shadow is True:
             self.scopes[-1][var_name] = ScopeEntry(var_type, False, None)
             self.emit("%s " % self.type_name(var_type))
 
@@ -216,6 +214,7 @@ def compile_script(filename, code):
     for lineno, message in errors:
         sys.stderr.write("%s:%d: %s\n" % (filename, lineno, message))
 
+    ast_ = AssignmentScopeAnalyzer().visit(ast_)
     ast_ = TypeAnnotator().visit(ast_)
     ast_ = CallInliner().visit(ast_)
     ast_ = StringInliner().visit(ast_)

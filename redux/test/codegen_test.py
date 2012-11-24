@@ -44,6 +44,7 @@ def test_code_generation():
         ("say(1::Rank)", "say (1::Rank);"),
         ("a = (QUERY UNIT WHERE query->HP > 0)", "object a = (QUERY UNIT [unit] MIN [1] WHERE [((query->HP)>0)]);"),
         ("a = (QUERY VALUE MIN query->HP)", "int a = (QUERY VALUE [unit] MIN [(query->HP)] WHERE [1]);"),
+        ("def f() a = 1 end a = 2 f()", "int a = 2;\n{\nint a = 1;\n}"),
     ]
 
     for redux_code, rescript_code in code_examples:
@@ -107,3 +108,13 @@ def test_assign_bitfield_to_numeric():
 @raises(InvalidExpressionError)
 def test_call_with_wrong_arg_count():
     c("def f(a, b) end f(1)")
+
+
+@raises(IncompatibleTypeError)
+def test_assign_to_bitfield_def():
+    c("bitfield A x : 1 end A = 1")
+
+
+@raises(IncompatibleTypeError)
+def test_assign_to_func_def():
+    c("def f() end f = 1")
