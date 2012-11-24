@@ -56,7 +56,6 @@ class Lexer(object):
         'EQ',
         'NEQ',
         'COLON',
-        'NUMBER',
         'INT',
         'FLOAT',
         'STRING',
