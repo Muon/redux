@@ -162,7 +162,7 @@ class TypeAnnotator(ASTTransformer):
         var_name = assignment.variable.name
 
         try:
-            if assignment.shadow is True:
+            if assignment.declare is True:
                 raise KeyError
 
             type_, immutable, value = self.get_scope_entry(var_name)

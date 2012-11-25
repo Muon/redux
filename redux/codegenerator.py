@@ -1,6 +1,6 @@
 import sys
 from collections import namedtuple
-from redux.assignmentshadow import AssignmentScopeAnalyzer
+from redux.assignmentdeclare import AssignmentScopeAnalyzer
 from redux.ast import Constant, BitfieldDefinition
 from redux.callinliner import CallInliner
 from redux.intrinsics import SayFunction, SqrtFunction
@@ -134,7 +134,7 @@ class CodeGenerator(ASTVisitor):
         expr_type = assignment.expression.type
         var_type = assignment.variable.type
 
-        if assignment.shadow is True:
+        if assignment.declare is True:
             self.scopes[-1][var_name] = ScopeEntry(var_type, False, None)
             self.emit("%s " % self.type_name(var_type))
 

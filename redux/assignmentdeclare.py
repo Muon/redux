@@ -40,10 +40,10 @@ class AssignmentScopeAnalyzer(ASTTransformer):
         return self.generic_visit(function_def)
 
     def visit_Assignment(self, assignment):
-        if assignment.shadow is False:
-            assignment.shadow = not self.is_name_used(assignment.variable.name)
+        if assignment.declare is False:
+            assignment.declare = not self.is_name_used(assignment.variable.name)
 
-        if assignment.shadow is True:
+        if assignment.declare is True:
             self.names[-1].add(assignment.variable.name)
 
         return assignment

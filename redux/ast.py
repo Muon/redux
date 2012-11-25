@@ -70,10 +70,10 @@ class CodeLiteral(Stmt):
 
 
 class Assignment(Stmt):
-    _fields = ["variable", "expression", "shadow"]
+    _fields = ["variable", "expression", "declare"]
 
-    def __init__(self, variable, expression, shadow=False):
-        super(Assignment, self).__init__(variable, expression, shadow)
+    def __init__(self, variable, expression, declare=False):
+        super(Assignment, self).__init__(variable, expression, declare)
 
 
 class BitfieldAssignment(Assignment):
