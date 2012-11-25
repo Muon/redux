@@ -37,6 +37,14 @@ def test_valid_parses():
         ("a = (QUERY UNIT WHERE query->HP > 100)", Block([Assignment(VarRef('a'), Query('UNIT', VarRef('unit'), 'MIN', Constant(1, 'int,'), GreaterThanOp(ChronalAccess(VarRef('query'), 'HP'), Constant(100, 'int,'))))])),
         ("a = (QUERY BESTMOVE target MIN query->XPosition)", Block([Assignment(VarRef("a"), Query("BESTMOVE", VarRef("target"), "MIN", ChronalAccess(VarRef("query"), "XPosition"), Constant(1, int_)))])),
         ("a = (QUERY UNIT MIN query->HP)", Block([Assignment(VarRef('a'), Query('UNIT', VarRef('unit'), 'MIN', ChronalAccess(VarRef('query'), 'HP'), Constant(1, 'int,')))])),
+        ("a = (QUERY UNIT MIN 1 WHERE query->HP)", Block([Assignment(VarRef('a'), Query('UNIT', VarRef('unit'), 'MIN', Constant(1, 'int,'), ChronalAccess(VarRef('query'), 'HP')))])),
+        ("a = QUERY VALUE SUM 1 WHERE unit->HP > 0 and 1 > 0", Block([Assignment(VarRef("a"), Query("VALUE", VarRef("unit"), "SUM", Constant(1, int_), LogicalAndOp(GreaterThanOp(ChronalAccess(VarRef("unit"), "HP"), Constant(0, int_)), GreaterThanOp(Constant(1, int_), Constant(0, int_)))))])),
+        ("a = QUERY UNIT WHERE query->HP > 100", Block([Assignment(VarRef('a'), Query('UNIT', VarRef('unit'), 'MIN', Constant(1, 'int,'), GreaterThanOp(ChronalAccess(VarRef('query'), 'HP'), Constant(100, 'int,'))))])),
+        ("a = QUERY BESTMOVE target MIN query->XPosition", Block([Assignment(VarRef("a"), Query("BESTMOVE", VarRef("target"), "MIN", ChronalAccess(VarRef("query"), "XPosition"), Constant(1, int_)))])),
+        ("a = QUERY UNIT MIN query->HP", Block([Assignment(VarRef('a'), Query('UNIT', VarRef('unit'), 'MIN', ChronalAccess(VarRef('query'), 'HP'), Constant(1, 'int,')))])),
+        ("a = QUERY UNIT MIN 1 WHERE query->HP", Block([Assignment(VarRef('a'), Query('UNIT', VarRef('unit'), 'MIN', Constant(1, 'int,'), ChronalAccess(VarRef('query'), 'HP')))])),
+        ("a = QUERY UNIT MIN QUERY VALUE query SUM 1 WHERE query->HP > 0", Block([Assignment(VarRef('a'), Query('UNIT', VarRef('unit'), 'MIN', Query('VALUE', VarRef('query'), 'SUM', Constant(1, int_), GreaterThanOp(ChronalAccess(VarRef('query'), 'HP'), Constant(0, int_))), Constant(1, int_)))])),
+        ("a = QUERY BESTMOVE MIN 1 WHERE 1", Block([Assignment(VarRef('a'), Query('BESTMOVE', VarRef('unit'), 'MIN', Constant(1, 'int,'), Constant(1, 'int,')))])),
     ]
 
     for code, ast_ in valid_parses:
