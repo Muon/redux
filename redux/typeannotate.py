@@ -193,6 +193,17 @@ class TypeAnnotator(ASTTransformer):
 
         return binop
 
+    def visit_NegateOp(self, negop):
+        negop = self.generic_visit(negop)
+
+        if negop.expression.type != int_:
+            raise InvalidExpressionError(negop)
+
+        negop.type = int_
+
+        return negop
+
+
     def visit_BitwiseOp(self, bitop):
         bitop = self.generic_visit(bitop)
 

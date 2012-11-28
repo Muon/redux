@@ -8,7 +8,7 @@ from redux.ast import (Block, Assignment, BitfieldAssignment, WhileStmt, IfStmt,
                        LogicalNotOp, LogicalAndOp, LogicalOrOp, ExprStmt,
                        ChronalAccess, ClassAccess, Query, BitwiseOrOp,
                        BitwiseXorOp, BitwiseAndOp, BitwiseLeftShiftOp,
-                       BitwiseRightShiftOp, ModuloOp)
+                       BitwiseRightShiftOp, ModuloOp, NegateOp)
 from redux.lexer import Lexer
 from redux.types import str_, int_, float_
 
@@ -175,12 +175,21 @@ class Parser(object):
         ('left', 'LSHIFT', 'RSHIFT'),
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIVIDE', 'PERCENT'),
+        ('right', 'UPLUS', 'UMINUS'),
         ('left', 'ARROW', 'DOT', 'DOUBLECOL')
     )
 
     def p_lnot(self, p):
         "expression : LNOT expression"
         p[0] = LogicalNotOp(p[2])
+
+    def p_uplus(self, p):
+        "expression : PLUS expression %prec UPLUS"
+        p[0] = p[2]
+
+    def p_uminus(self, p):
+        "expression : MINUS expression %prec UMINUS"
+        p[0] = NegateOp(p[2])
 
     def p_empty(self, p):
         "empty : "

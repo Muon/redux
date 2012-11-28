@@ -245,5 +245,9 @@ class UnaryOp(Expr):
     _fields = ["expression"]
 
 
+class NegateOp(UnaryOp):
+    pass
+
+
 class LogicalNotOp(RelationalOp, UnaryOp):
     pass

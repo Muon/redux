@@ -58,6 +58,12 @@ class CodeGenerator(ASTVisitor):
         self.visit(binop.rhs)
         self.emit(")")
 
+    def emit_unary_op(self, unop, op):
+        self.emit("(")
+        self.emit(op)
+        self.visit(unop.expression)
+        self.emit(")")
+
     def visit_AddOp(self, binop):
         self.emit_binary_op(binop, "+")
 
@@ -95,9 +101,7 @@ class CodeGenerator(ASTVisitor):
         self.emit_binary_op(binop, "||")
 
     def visit_LogicalNotOp(self, a):
-        self.emit("(!")
-        self.visit(a.expression)
-        self.emit(")")
+        self.emit_unary_op(a, "!")
 
     def visit_BitwiseOrOp(self, binop):
         self.emit_binary_op(binop, "|")
@@ -116,6 +120,9 @@ class CodeGenerator(ASTVisitor):
 
     def visit_ModuloOp(self, binop):
         self.emit_binary_op(binop, "%")
+
+    def visit_NegateOp(self, unop):
+        self.emit_unary_op(unop, "-")
 
     def visit_BitfieldAssignment(self, assignment):
         self.visit(assignment.variable)
