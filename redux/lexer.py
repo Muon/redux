@@ -67,6 +67,7 @@ class Lexer(object):
         'DOUBLECOL',
         'VBAR',
         'CARET',
+        'AMP',
     ) + tuple(reserved.values())
 
     t_LPAREN = r'\('
@@ -91,6 +92,7 @@ class Lexer(object):
     t_DOUBLECOL = r'::'
     t_VBAR = r'\|'
     t_CARET = r'\^'
+    t_AMP = r'&'
 
     t_ignore_COMMENT = r'\#.*'
 

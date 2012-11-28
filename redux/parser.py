@@ -7,7 +7,7 @@ from redux.ast import (Block, Assignment, BitfieldAssignment, WhileStmt, IfStmt,
                        GreaterThanOrEqualToOp, LessThanOp, LessThanOrEqualToOp,
                        LogicalNotOp, LogicalAndOp, LogicalOrOp, ExprStmt,
                        ChronalAccess, ClassAccess, Query, BitwiseOrOp,
-                       BitwiseXorOp)
+                       BitwiseXorOp, BitwiseAndOp)
 from redux.lexer import Lexer
 from redux.types import str_, int_, float_
 
@@ -170,6 +170,7 @@ class Parser(object):
         ('nonassoc', 'LT', 'GT', 'LTE', 'GTE', 'EQ', 'NEQ'),
         ('left', 'VBAR'),
         ('left', 'CARET'),
+        ('left', 'AMP'),
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIVIDE'),
         ('left', 'ARROW', 'DOT', 'DOUBLECOL')
@@ -350,6 +351,7 @@ binary_expr(LogicalOrOp, 'LOR')
 binary_expr(LogicalAndOp, 'LAND')
 binary_expr(BitwiseOrOp, 'VBAR')
 binary_expr(BitwiseXorOp, 'CARET')
+binary_expr(BitwiseAndOp, 'AMP')
 
 _parser = Parser()
 

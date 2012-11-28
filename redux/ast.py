@@ -189,6 +189,10 @@ class BitwiseXorOp(BitwiseOp, BinaryOp):
     pass
 
 
+class BitwiseAndOp(BitwiseOp, BinaryOp):
+    pass
+
+
 class RelationalOp(ASTNode):
     pass
 
