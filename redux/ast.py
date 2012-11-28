@@ -1,3 +1,5 @@
+from redux.types import int_
+
 class ASTNode(object):
     """Base class of all AST nodes."""
     _fields = []
@@ -126,7 +128,7 @@ class EnumDefinition(Stmt):
                 assert value > counter
                 counter = value
 
-            computed_members.append((member_name, counter))
+            computed_members.append((member_name, Constant(counter, int_)))
 
         super(Stmt, self).__init__(name, computed_members)
 

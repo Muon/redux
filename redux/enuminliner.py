@@ -1,5 +1,3 @@
-from redux.ast import Constant
-from redux.types import int_
 from redux.visitor import ASTTransformer
 
 
@@ -32,6 +30,6 @@ class EnumInliner(ASTTransformer):
         self.generic_visit(enum_def)
 
         for name, value in enum_def.members:
-            self.scopes[-1][name] = Constant(value, int_)
+            self.scopes[-1][name] = value
 
         return enum_def
