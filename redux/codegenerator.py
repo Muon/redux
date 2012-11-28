@@ -102,6 +102,9 @@ class CodeGenerator(ASTVisitor):
     def visit_BitwiseOrOp(self, binop):
         self.emit_binary_op(binop, "|")
 
+    def visit_BitwiseXorOp(self, binop):
+        self.emit_binary_op(binop, "^")
+
     def visit_BitfieldAssignment(self, assignment):
         self.visit(assignment.variable)
         self.emit(" = ")
