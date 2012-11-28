@@ -114,6 +114,9 @@ class CodeGenerator(ASTVisitor):
     def visit_BitwiseRightShiftOp(self, binop):
         self.emit_binary_op(binop, ">>")
 
+    def visit_ModuloOp(self, binop):
+        self.emit_binary_op(binop, "%")
+
     def visit_BitfieldAssignment(self, assignment):
         self.visit(assignment.variable)
         self.emit(" = ")

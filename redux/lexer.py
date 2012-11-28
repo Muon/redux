@@ -70,6 +70,7 @@ class Lexer(object):
         'AMP',
         'LSHIFT',
         'RSHIFT',
+        'PERCENT',
     ) + tuple(reserved.values())
 
     t_LPAREN = r'\('
@@ -97,6 +98,7 @@ class Lexer(object):
     t_AMP = r'&'
     t_LSHIFT = r'<<'
     t_RSHIFT = r'>>'
+    t_PERCENT = r'%'
 
     t_ignore_COMMENT = r'\#.*'
 

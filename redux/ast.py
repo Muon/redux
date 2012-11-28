@@ -177,6 +177,10 @@ class DivOp(BinaryOp):
     pass
 
 
+class ModuloOp(BinaryOp):
+    pass
+
+
 class BitwiseOp(ASTNode):
     pass
 

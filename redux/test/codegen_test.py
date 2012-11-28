@@ -35,6 +35,7 @@ def test_code_generation():
         ("a = 1 & 1", "int a = (1&1);"),
         ("a = 1 >> 1", "int a = (1>>1);"),
         ("a = 1 << 1", "int a = (1<<1);"),
+        ("a = 1 % 1", "int a = (1%1);"),
         ("a = 1.0 b = 1 + a", "float a = 1.0;\nfloat b = (1+a);"),
         ("a = 1 b = 1.0 a = b", "int a = 1;\nfloat b = 1.0;\na = b;"),
         ("bitfield A x : 12 y : 12 z : 8 end a = A(0)", "int a = 0;"),
