@@ -35,6 +35,7 @@ def test_code_generation():
         ("a = 1 & 1", "int a = (1&1);"),
         ("a = 1 >> 1", "int a = (1>>1);"),
         ("a = 1 << 1", "int a = (1<<1);"),
+        ("a = ~1", "int a = (~1);"),
         ("a = 1 % 1", "int a = (1%1);"),
         ("a = 1 b = -a", "int a = 1;\nint b = (-a);"),
         ("a = 1.0 b = 1 + a", "float a = 1.0;\nfloat b = (1+a);"),

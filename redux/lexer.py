@@ -71,6 +71,7 @@ class Lexer(object):
         'LSHIFT',
         'RSHIFT',
         'PERCENT',
+        'TILDE',
     ) + tuple(reserved.values())
 
     t_LPAREN = r'\('
@@ -99,6 +100,7 @@ class Lexer(object):
     t_LSHIFT = r'<<'
     t_RSHIFT = r'>>'
     t_PERCENT = r'%'
+    t_TILDE = r'~'
 
     t_ignore_COMMENT = r'\#.*'
 

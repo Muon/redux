@@ -248,6 +248,8 @@ class UnaryOp(Expr):
 class NegateOp(UnaryOp):
     pass
 
+class BitwiseNotOp(BitwiseOp, UnaryOp):
+    pass
 
 class LogicalNotOp(RelationalOp, UnaryOp):
     pass

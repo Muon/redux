@@ -124,6 +124,9 @@ class CodeGenerator(ASTVisitor):
     def visit_NegateOp(self, unop):
         self.emit_unary_op(unop, "-")
 
+    def visit_BitwiseNotOp(self, unop):
+        self.emit_unary_op(unop, "~")
+
     def visit_BitfieldAssignment(self, assignment):
         self.visit(assignment.variable)
         self.emit(" = ")
