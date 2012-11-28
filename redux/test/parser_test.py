@@ -6,7 +6,7 @@ from redux.ast import (Block, Assignment, WhileStmt, IfStmt, FunctionCall,
                        GreaterThanOp, LogicalNotOp, ChronalAccess, ClassAccess,
                        LogicalAndOp, Query, BitwiseOrOp, BitwiseXorOp,
                        BitwiseAndOp, BitwiseRightShiftOp, BitwiseLeftShiftOp,
-                       ModuloOp, NegateOp, BitwiseNotOp)
+                       ModuloOp, NegateOp, BitwiseNotOp, PowerOp)
 from redux.parser import parse
 from redux.types import int_, str_
 
@@ -55,6 +55,7 @@ def test_valid_parses():
         ("a = ~4", Block([Assignment(VarRef('a'), BitwiseNotOp(Constant(4, int_)))])),
         ("a = 1 % 4", Block([Assignment(VarRef('a'), ModuloOp(Constant(1, int_), Constant(4, int_)))])),
         ("a = -a", Block([Assignment(VarRef('a'), NegateOp(VarRef("a")))])),
+        ("a = 2 ** 2", Block([Assignment(VarRef('a'), PowerOp(Constant(2, int_), Constant(2, int_)))])),
     ]
 
     for code, ast_ in valid_parses:

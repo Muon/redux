@@ -47,6 +47,7 @@ class Lexer(object):
         'DOT',
         'PLUS',
         'MINUS',
+        'POW',
         'TIMES',
         'DIVIDE',
         'LT',
@@ -101,6 +102,7 @@ class Lexer(object):
     t_RSHIFT = r'>>'
     t_PERCENT = r'%'
     t_TILDE = r'~'
+    t_POW = r'\*\*'
 
     t_ignore_COMMENT = r'\#.*'
 

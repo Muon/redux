@@ -181,6 +181,10 @@ class ModuloOp(BinaryOp):
     pass
 
 
+class PowerOp(BinaryOp):
+    pass
+
+
 class BitwiseOp(ASTNode):
     pass
 
@@ -248,8 +252,10 @@ class UnaryOp(Expr):
 class NegateOp(UnaryOp):
     pass
 
+
 class BitwiseNotOp(BitwiseOp, UnaryOp):
     pass
+
 
 class LogicalNotOp(RelationalOp, UnaryOp):
     pass

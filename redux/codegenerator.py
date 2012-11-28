@@ -118,6 +118,9 @@ class CodeGenerator(ASTVisitor):
     def visit_BitwiseRightShiftOp(self, binop):
         self.emit_binary_op(binop, ">>")
 
+    def visit_PowerOp(self, binop):
+        self.emit_binary_op(binop, "**")
+
     def visit_ModuloOp(self, binop):
         self.emit_binary_op(binop, "%")
 
