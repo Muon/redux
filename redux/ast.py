@@ -193,6 +193,14 @@ class BitwiseAndOp(BitwiseOp, BinaryOp):
     pass
 
 
+class BitwiseLeftShiftOp(BitwiseOp, BinaryOp):
+    pass
+
+
+class BitwiseRightShiftOp(BitwiseOp, BinaryOp):
+    pass
+
+
 class RelationalOp(ASTNode):
     pass
 

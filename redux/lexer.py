@@ -68,6 +68,8 @@ class Lexer(object):
         'VBAR',
         'CARET',
         'AMP',
+        'LSHIFT',
+        'RSHIFT',
     ) + tuple(reserved.values())
 
     t_LPAREN = r'\('
@@ -93,6 +95,8 @@ class Lexer(object):
     t_VBAR = r'\|'
     t_CARET = r'\^'
     t_AMP = r'&'
+    t_LSHIFT = r'<<'
+    t_RSHIFT = r'>>'
 
     t_ignore_COMMENT = r'\#.*'
 
