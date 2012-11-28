@@ -1,8 +1,8 @@
 import sys
-from collections import namedtuple
 from redux.assignmentdeclare import AssignmentScopeAnalyzer
-from redux.ast import Constant, BitfieldDefinition
+from redux.ast import BitfieldDefinition
 from redux.callinliner import CallInliner
+from redux.enuminliner import EnumInliner
 from redux.intrinsics import SayFunction, SqrtFunction
 from redux.parser import parse
 from redux.stringinliner import StringInliner
@@ -11,22 +11,10 @@ from redux.types import str_, float_, int_, object_, is_numeric
 from redux.visitor import ASTVisitor
 
 
-ScopeEntry = namedtuple("ScopeEntry", ("type", "immutable", "value"))
-
-
 class CodeGenerator(ASTVisitor):
     """Generates code from AST."""
     def __init__(self):
         super(CodeGenerator, self).__init__()
-        self.scopes = [
-            {
-                "unit": ScopeEntry(object_, False, None),
-                "query": ScopeEntry(object_, False, None),
-                "perf_ret": ScopeEntry(int_, False, None),
-                "perf_ret_float": ScopeEntry(float_, False, None),
-            }
-        ]
-
         self.intrinsics = {"say": SayFunction(), "sqrt": SqrtFunction()}
 
         self.code = ""
@@ -36,18 +24,9 @@ class CodeGenerator(ASTVisitor):
 
     def push_scope(self):
         self.emit("{\n")
-        self.scopes.append({})
 
     def pop_scope(self):
-        self.scopes.pop()
         self.emit("}\n")
-
-    def get_scope_entry(self, name):
-        for scope in reversed(self.scopes):
-            if name in scope:
-                return scope[name]
-
-        raise KeyError(name)
 
     def type_name(self, type_):
         if isinstance(type_, BitfieldDefinition):
@@ -70,11 +49,7 @@ class CodeGenerator(ASTVisitor):
             self.intrinsics[func_call.function].codegen(self, func_call.arguments)
 
     def visit_VarRef(self, var_ref):
-        entry = self.get_scope_entry(var_ref.name)
-        if entry.immutable:
-            self.visit(entry.value)
-        else:
-            self.emit(var_ref.name)
+        self.emit(var_ref.name)
 
     def emit_binary_op(self, binop, op):
         self.emit("(")
@@ -130,13 +105,8 @@ class CodeGenerator(ASTVisitor):
         self.visit(assignment.expression)
 
     def visit_Assignment(self, assignment):
-        var_name = assignment.variable.name
-        expr_type = assignment.expression.type
-        var_type = assignment.variable.type
-
         if assignment.declare is True:
-            self.scopes[-1][var_name] = ScopeEntry(var_type, False, None)
-            self.emit("%s " % self.type_name(var_type))
+            self.emit("%s " % self.type_name(assignment.variable.type))
 
         self.visit(assignment.variable)
         self.emit(" = ")
@@ -150,10 +120,6 @@ class CodeGenerator(ASTVisitor):
         else:
             self.visit(dotted_access.expression)
             self.emit("[%d, %d]" % dotted_access.expression.type.get_member_limits(dotted_access.member))
-
-    def visit_EnumDefinition(self, enum_definition):
-        for name, value in enum_definition.members:
-            self.scopes[-1][name] = ScopeEntry(int_, True, Constant(value, int_))
 
     def visit_Block(self, block):
         self.push_scope()
@@ -217,6 +183,7 @@ def compile_script(filename, code):
     ast_ = AssignmentScopeAnalyzer().visit(ast_)
     ast_ = TypeAnnotator().visit(ast_)
     ast_ = CallInliner().visit(ast_)
+    ast_ = EnumInliner().visit(ast_)
     ast_ = StringInliner().visit(ast_)
 
     code_generator.visit(ast_)
