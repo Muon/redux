@@ -177,6 +177,14 @@ class DivOp(BinaryOp):
     pass
 
 
+class BitwiseOp(ASTNode):
+    pass
+
+
+class BitwiseOrOp(BitwiseOp, BinaryOp):
+    pass
+
+
 class RelationalOp(ASTNode):
     pass
 

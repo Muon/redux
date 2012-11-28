@@ -193,6 +193,17 @@ class TypeAnnotator(ASTTransformer):
 
         return binop
 
+    def visit_BitwiseOp(self, bitop):
+        bitop = self.generic_visit(bitop)
+
+        for child in bitop.children():
+            if child.type != int_:
+                raise InvalidExpressionError(bitop)
+
+        bitop.type = int_
+
+        return bitop
+
     def visit_RelationalOp(self, relop):
         relop = self.generic_visit(relop)
 
