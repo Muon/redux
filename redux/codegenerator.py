@@ -3,7 +3,7 @@ from redux.assignmentdeclare import AssignmentScopeAnalyzer
 from redux.ast import BitfieldDefinition
 from redux.callinliner import CallInliner
 from redux.enuminliner import EnumInliner
-from redux.intrinsics import SayFunction, SqrtFunction
+from redux.intrinsics import get_intrinsic_functions
 from redux.parser import parse
 from redux.stringinliner import StringInliner
 from redux.typeannotate import TypeAnnotator
@@ -15,7 +15,7 @@ class CodeGenerator(ASTVisitor):
     """Generates code from AST."""
     def __init__(self):
         super(CodeGenerator, self).__init__()
-        self.intrinsics = {"say": SayFunction(), "sqrt": SqrtFunction()}
+        self.intrinsics = dict(get_intrinsic_functions())
 
         self.code = ""
 

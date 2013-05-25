@@ -5,7 +5,7 @@ Feature parity:
  ✔ Bitwise operators @done (2012-11-28 21:50)
  ✔ QUERY expressions @done (2012-11-23 20:32)
  ✔ object fields @done (2012-11-19 15:36)
- ☐ Other intrinsic functions (max, min, dist, distSq, sin, cos, tan, etc.)
+ ✔ Other intrinsic functions (max, min, dist, distSq, sin, cos, tan, etc.) @done (2013-05-25 19:50)
 AST:
  ✔ Rewrite AST nodes @done (2012-11-18 15:31)
  ✔ Simplify visitors @done (2012-11-18 17:58)

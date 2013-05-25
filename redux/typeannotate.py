@@ -1,7 +1,7 @@
 from collections import namedtuple
 from copy import deepcopy
 from redux.ast import FunctionDefinition, BitfieldDefinition, ReturnStmt, Assignment, VarRef
-from redux.intrinsics import IntrinsicFunction, SayFunction, SqrtFunction, GetAchronalField, SetAchronalField
+from redux.intrinsics import get_intrinsic_functions, IntrinsicFunction, GetAchronalField, SetAchronalField
 from redux.types import is_numeric, common_arithmetic_type, check_assignable, int_, float_, str_, object_
 from redux.visitor import ASTTransformer, ASTVisitor
 from redux.objectattributes import CHRONAL_ATTRS, ACHRONAL_ATTRS
@@ -44,10 +44,18 @@ class TypeAnnotator(ASTTransformer):
                 "perf_ret_float": ScopeEntry(float_, False, None),
                 "query": ScopeEntry(object_, False, None),
                 "unit": ScopeEntry(object_, False, None),
-                "say": ScopeEntry(IntrinsicFunction, True, SayFunction()),
-                "sqrt": ScopeEntry(IntrinsicFunction, True, SqrtFunction())
+                "player": ScopeEntry(object_, False, None),
+                "target": ScopeEntry(object_, False, None),
+                "ignore_collision_with_unit": ScopeEntry(object_, False, None),
+                "query_vis_distance": ScopeEntry(int_, False, None),
+                "min_action_ticks": ScopeEntry(int_, False, None),
+                "ignore_moving_units_dist": ScopeEntry(int_, False, None),
+                "goal_distance": ScopeEntry(int_, False, None),
             }
         ]
+
+        for name, intrinsic in get_intrinsic_functions():
+            self.scopes[0][name] = ScopeEntry(IntrinsicFunction, True, intrinsic)
 
         self.visit(GetAchronalField())
         self.visit(SetAchronalField())
@@ -115,7 +123,7 @@ class TypeAnnotator(ASTTransformer):
 
         if entry.type is not FunctionDefinition:
             if entry.type is IntrinsicFunction:
-                func_call.type = entry.value.type
+                func_call.type = entry.value.type(func_call.arguments)
                 func_call.func_def = entry.value
             elif entry.type is BitfieldDefinition:
                 func_call.type = entry.value
