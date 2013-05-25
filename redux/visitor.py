@@ -1,8 +1,15 @@
 from redux.ast import ASTNode
+import logging
 
 
 class Visitor(object):
     "Implements the extrinsic Visitor pattern."
+    def __init__(self):
+        super(Visitor, self).__init__()
+        self.depth = 0
+
+    def log(self, fmt, *args, **kwargs):
+        logging.getLogger(type(self).__name__).debug("%s%d: " + fmt, "    " * self.depth, self.depth, *args, **kwargs)
 
     def visit(self, node, *args, **kwargs):
         "Starts visiting node."
@@ -15,7 +22,12 @@ class Visitor(object):
             except AttributeError:
                 pass
 
-        return visitor(node, *args, **kwargs)
+        self.log("Visiting child: %r", node)
+        self.depth += 1
+        result = visitor(node, *args, **kwargs)
+        self.log("Leaving node: %r", node)
+        self.depth -= 1
+        return result
 
 
 class ASTVisitor(Visitor):
