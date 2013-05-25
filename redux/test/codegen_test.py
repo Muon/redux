@@ -54,6 +54,9 @@ def test_code_generation():
         ("a = (QUERY UNIT WHERE query->HP > 0)", "object a = (QUERY UNIT [unit] MIN [1] WHERE [((query->HP)>0)]);"),
         ("a = (QUERY VALUE MIN query->HP)", "int a = (QUERY VALUE [unit] MIN [(query->HP)] WHERE [1]);"),
         ("def f() a = 1 end a = 2 f()", "int a = 2;\n{\nint a = 1;\n}"),
+        ("for a = 1, a < 100, a = a + 1 say(a) end", "for(int a = 1; (a<100); a = (a+1)){\nsay a;\n}"),
+        ("def f(x) return x*x end for a = f(2), a < f(8), a = a + 1 end", "int __retval1 = 0;\n{\nint x = 2;\n__retval1 = (x*x);\n}\nfor(int a = __retval1; ; a = (a+1)){\nint __retval0 = 0;\n{\nint x = 8;\n__retval0 = (x*x);\n}\nif((a<__retval0)){\n}\nelse {\nbreak;\n}\n}"),
+        ("def f(x) return x*x end for a = 1, a < 100, a = f(a) end", "for(int a = 1; (a<100); ){\n{\n}\nint __retval0 = 0;\n{\nint x = a;\n__retval0 = (x*x);\n}\na = __retval0;\n}")
     ]
 
     for redux_code, rescript_code in code_examples:

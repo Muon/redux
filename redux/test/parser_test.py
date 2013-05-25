@@ -6,7 +6,8 @@ from redux.ast import (Block, Assignment, WhileStmt, IfStmt, FunctionCall,
                        GreaterThanOp, LogicalNotOp, ChronalAccess, ClassAccess,
                        LogicalAndOp, Query, BitwiseOrOp, BitwiseXorOp,
                        BitwiseAndOp, BitwiseRightShiftOp, BitwiseLeftShiftOp,
-                       ModuloOp, NegateOp, BitwiseNotOp, PowerOp)
+                       ModuloOp, NegateOp, BitwiseNotOp, PowerOp, ForStmt,
+                       LessThanOp, ExprStmt)
 from redux.parser import parse
 from redux.types import int_, str_
 
@@ -23,6 +24,7 @@ def test_valid_parses():
         ("if a == 0 elif b == 0 else end", Block([IfStmt(EqualToOp(VarRef('a'), Constant(0, int_)), Block([]), Block([IfStmt(EqualToOp(VarRef('b'), Constant(0, int_)), Block([]), Block([]))]))])),
         ("`PERFORM RAND;`", Block([CodeLiteral("PERFORM RAND;")])),
         ("while a > 0 end", Block([WhileStmt(GreaterThanOp(VarRef("a"), Constant(0, int_)), Block([]))])),
+        ("for a = 1, a<100, a = a + 1 say(a) end", Block([ForStmt(Assignment(VarRef('a'), Constant(1, 'int,')), LessThanOp(VarRef('a'), Constant(100, 'int,')), Assignment(VarRef('a'), AddOp(VarRef('a'), Constant(1, 'int,'))), Block([ExprStmt(FunctionCall('say', [VarRef('a')]))]))])),
         ("break", Block([BreakStmt()])),
         ("def f() return 1 end", Block([FunctionDefinition("f", [], Block([ReturnStmt(Constant(1, int_))]))])),
         ("def f(a, b) end", Block([FunctionDefinition("f", ["a", "b"], Block([]))])),

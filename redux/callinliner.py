@@ -1,7 +1,7 @@
 from redux.ast import (Block, Assignment, WhileStmt, IfStmt, BreakStmt,
-                       ReturnStmt, Constant, VarRef, Stmt)
+                       ReturnStmt, Constant, VarRef, Stmt, NoOp)
 from redux.types import int_
-from redux.visitor import ASTTransformer
+from redux.visitor import ASTTransformer, ASTVisitor
 
 
 class CallInliner(ASTTransformer):
@@ -18,23 +18,56 @@ class CallInliner(ASTTransformer):
         self.return_value_counter += 1
         return temporary
 
+    def push_prepend_ctx(self):
+        self.prepend_stack.append([])
+
+    def pop_prepend_ctx(self):
+        return self.prepend_stack.pop()
+
     def prepend_stmt(self, stmt):
+        """Insert a statement before the one currently being processed."""
+        self.log("Requesting prepend of %r", stmt)
         self.prepend_stack[-1].append(stmt)
 
-    def generic_visit(self, node):
-        if isinstance(node, Stmt):
-            self.prepend_stack.append([])
-
+    def visit_Stmt(self, node):
+        self.push_prepend_ctx()
+        self.log("New generic statement: %r", node)
         result = super(CallInliner, self).generic_visit(node)
+        new_statements = self.pop_prepend_ctx()
+        if result is not None:
+            new_statements.append(result)
+        self.log("Replacing statement with statement(s): %r", new_statements)
+        return new_statements
 
-        if isinstance(node, Stmt):
-            new_statements = self.prepend_stack.pop()
-            if result is not None:
-                new_statements.append(result)
+    def visit_ForStmt(self, for_stmt):
+        class NontrivialFunctionCheck(ASTVisitor):
+            def visit_FunctionCall(self, func_call):
+                if func_call.func_def.nontrivial is True:
+                    raise RuntimeError
 
-            return new_statements
-        else:
-            return result
+        self.push_prepend_ctx()
+
+        for_stmt.block = self.visit(for_stmt.block)
+
+        try:
+            NontrivialFunctionCheck().visit(for_stmt.step_expr)
+        except RuntimeError:
+            for_stmt.block = self.visit(Block([for_stmt.block, for_stmt.step_expr]))
+            for_stmt.step_expr = None
+
+        try:
+            NontrivialFunctionCheck().visit(for_stmt.condition)
+        except RuntimeError:
+            for_stmt.block = self.visit(Block([IfStmt(for_stmt.condition, for_stmt.block, Block([BreakStmt()]))]))
+            for_stmt.condition = None
+
+        try:
+            NontrivialFunctionCheck().visit(for_stmt.assignment)
+        except RuntimeError:
+            self.log("Non-trivial assignment in for loop")
+            for_stmt.assignment.expression = self.visit(for_stmt.assignment.expression)
+
+        return self.pop_prepend_ctx() + [for_stmt]
 
     def visit_WhileStmt(self, while_stmt):
         new_block = self.visit(Block([IfStmt(while_stmt.condition,
@@ -58,11 +91,17 @@ class CallInliner(ASTTransformer):
 
         new_statements = new_block.statements
 
+        # If we have something like a = f(x), we have to insert the function
+        # body *before* the assignment, then use a temporary return variable to
+        # save the result of the function call.
         if new_statements and isinstance(new_statements[-1], ReturnStmt):
             return_var = self.allocate_temporary(func_call.type)
+            self.log("Function call return var: %r", return_var)
             return_expr = new_statements[-1].expression
             new_statements[-1] = Assignment(return_var, return_expr)
             self.prepend_stmt(new_block)
             return return_var
         else:
-            return new_block
+            # Function is empty or does not contain a return statement.
+            self.prepend_stmt(new_block)
+            return NoOp()

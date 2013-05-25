@@ -93,6 +93,10 @@ class WhileStmt(Stmt):
     _fields = ["condition", "block"]
 
 
+class ForStmt(Stmt):
+    _fields = ["assignment", "condition", "step_expr", "block"]
+
+
 class FunctionDefinition(Stmt):
     _fields = ["name", "arguments", "block", "nontrivial"]
 
@@ -156,6 +160,8 @@ class ClassAccess(Expr):
 class Query(Expr):
     _fields = ["query_type", "unit", "op", "op_expr", "where_cond"]
 
+class NoOp(Expr):
+    pass
 
 class BinaryOp(Expr):
     _fields = ["lhs", "rhs"]

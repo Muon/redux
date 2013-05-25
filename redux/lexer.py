@@ -37,6 +37,7 @@ class Lexer(object):
         "MAX": "MAX",
         "AVE": "AVE",
         "SUM": "SUM",
+        "for": "FOR",
     }
 
     tokens = (

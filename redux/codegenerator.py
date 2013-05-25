@@ -178,6 +178,18 @@ class CodeGenerator(ASTVisitor):
         self.emit(")")
         self.visit(while_stmt.block)
 
+    def visit_ForStmt(self, for_stmt):
+        self.emit("for(")
+        self.visit(for_stmt.assignment)
+        self.emit("; ")
+        if for_stmt.condition is not None:
+            self.visit(for_stmt.condition)
+        self.emit("; ")
+        if for_stmt.step_expr is not None:
+            self.visit(for_stmt.step_expr)
+        self.emit(")")
+        self.visit(for_stmt.block)
+
     def visit_CodeLiteral(self, code_literal):
         self.emit(code_literal.code)
 

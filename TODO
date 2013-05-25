@@ -1,7 +1,7 @@
 Redux:
 
 Feature parity:
- ☐ For loops
+ ✔ For loops @done (2013-05-25 18:26)
  ✔ Bitwise operators @done (2012-11-28 21:50)
  ✔ QUERY expressions @done (2012-11-23 20:32)
  ✔ object fields @done (2012-11-19 15:36)

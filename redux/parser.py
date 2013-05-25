@@ -9,7 +9,7 @@ from redux.ast import (Block, Assignment, BitfieldAssignment, WhileStmt, IfStmt,
                        ChronalAccess, ClassAccess, Query, BitwiseOrOp,
                        BitwiseXorOp, BitwiseAndOp, BitwiseLeftShiftOp,
                        BitwiseRightShiftOp, ModuloOp, NegateOp, BitwiseNotOp,
-                       PowerOp)
+                       PowerOp, ForStmt)
 from redux.lexer import Lexer
 from redux.types import str_, int_, float_
 
@@ -44,6 +44,7 @@ class Parser(object):
         stmt : assignment
              | if_stmt
              | while_stmt
+             | for_stmt
              | func_def
              | code_literal
              | break_stmt
@@ -103,6 +104,10 @@ class Parser(object):
     def p_while_stmt(self, p):
         "while_stmt : WHILE expression block END"
         p[0] = WhileStmt(p[2], p[3])
+
+    def p_for_stmt(self, p):
+        "for_stmt : FOR assignment COMMA expression COMMA assignment block END"
+        p[0] = ForStmt(p[2], p[4], p[6], p[7])
 
     def p_return_stmt(self, p):
         "return_stmt : RETURN expression"
