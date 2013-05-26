@@ -34,25 +34,26 @@ class ImmutabilityViolationError(TypeError):
     pass
 
 
+INITIAL_SCOPE = {
+    "perf_ret": ScopeEntry(int_, False, None),
+    "perf_ret_float": ScopeEntry(float_, False, None),
+    "query": ScopeEntry(object_, False, None),
+    "unit": ScopeEntry(object_, False, None),
+    "player": ScopeEntry(object_, False, None),
+    "target": ScopeEntry(object_, False, None),
+    "ignore_collision_with_unit": ScopeEntry(object_, False, None),
+    "query_vis_distance": ScopeEntry(int_, False, None),
+    "min_action_ticks": ScopeEntry(int_, False, None),
+    "ignore_moving_units_dist": ScopeEntry(int_, False, None),
+    "goal_distance": ScopeEntry(int_, False, None),
+}
+
+
 class TypeAnnotator(ASTTransformer):
     """Annotates AST with type information."""
     def __init__(self):
         super(TypeAnnotator, self).__init__()
-        self.scopes = [
-            {
-                "perf_ret": ScopeEntry(int_, False, None),
-                "perf_ret_float": ScopeEntry(float_, False, None),
-                "query": ScopeEntry(object_, False, None),
-                "unit": ScopeEntry(object_, False, None),
-                "player": ScopeEntry(object_, False, None),
-                "target": ScopeEntry(object_, False, None),
-                "ignore_collision_with_unit": ScopeEntry(object_, False, None),
-                "query_vis_distance": ScopeEntry(int_, False, None),
-                "min_action_ticks": ScopeEntry(int_, False, None),
-                "ignore_moving_units_dist": ScopeEntry(int_, False, None),
-                "goal_distance": ScopeEntry(int_, False, None),
-            }
-        ]
+        self.scopes = [INITIAL_SCOPE.copy()]
 
         for name, intrinsic in get_intrinsic_functions():
             self.scopes[0][name] = ScopeEntry(IntrinsicFunction, True, intrinsic)

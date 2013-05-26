@@ -1,9 +1,10 @@
 from redux.visitor import ASTTransformer
+from redux.names import get_initial_names
 
 class AssignmentScopeAnalyzer(ASTTransformer):
     def __init__(self):
         super(AssignmentScopeAnalyzer, self).__init__()
-        self.names = []
+        self.names = [set(get_initial_names())]
 
     def push_scope(self):
         self.names.append(set())
