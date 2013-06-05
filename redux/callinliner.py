@@ -76,7 +76,7 @@ class CallInliner(ASTTransformer):
         return WhileStmt(Constant(1, int_), new_block)
 
     def visit_FunctionDefinition(self, func_def):
-        pass
+        return None
 
     def visit_FunctionCall(self, func_call):
         self.generic_visit(func_call)
