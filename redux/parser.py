@@ -9,7 +9,7 @@ from redux.ast import (Block, Assignment, BitfieldAssignment, WhileStmt, IfStmt,
                        ChronalAccess, ClassAccess, Query, BitwiseOrOp,
                        BitwiseXorOp, BitwiseAndOp, BitwiseLeftShiftOp,
                        BitwiseRightShiftOp, ModuloOp, NegateOp, BitwiseNotOp,
-                       PowerOp, ForStmt)
+                       PowerOp, ForStmt, Require)
 from redux.lexer import Lexer
 from redux.types import str_, int_, float_
 
@@ -50,6 +50,7 @@ class Parser(object):
              | break_stmt
              | bitfield_def
              | enum_def
+             | require_stmt
         """
         p[0] = p[1]
 
@@ -257,6 +258,10 @@ class Parser(object):
     def p_enum_def(self, p):
         "enum_def : ENUM ID enum_member_list END"
         p[0] = EnumDefinition(p[2], p[3])
+
+    def p_require_stmt(self, p):
+        "require_stmt : REQUIRE STRING"
+        p[0] = Require(p[2])
 
     def p_enum_member_list_start(self, p):
         "enum_member_list : enum_member"

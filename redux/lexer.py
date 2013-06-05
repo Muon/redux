@@ -38,6 +38,7 @@ class Lexer(object):
         "AVE": "AVE",
         "SUM": "SUM",
         "for": "FOR",
+        "require": "REQUIRE",
     }
 
     tokens = (
@@ -104,6 +105,7 @@ class Lexer(object):
     t_PERCENT = r'%'
     t_TILDE = r'~'
     t_POW = r'\*\*'
+    t_REQUIRE = r'require'
 
     t_ignore_COMMENT = r'\#.*'
 

@@ -79,10 +79,15 @@ def test_code_generation():
         ("set_say_target(\"foo\")", "(say_to_var\"foo\");"),
         ("say_config_var(\"foo\")", "(say_from_config\"foo\");"),
         ("target = object(0)", "target = (to_object0);"),
+        ("require \"examples/example0\"", ""),
+        ("require \"examples/example0\" say(f(2))", "int __retval0 = 0;\n{\nint x = 2;\n__retval0 = (x*x);\n}\nsay __retval0;"),
     ]
 
     for redux_code, rescript_code in code_examples:
-        yield check_code_generation, redux_code, ("{\n" + rescript_code + "\n}\n")
+        if rescript_code:
+            yield check_code_generation, redux_code, ("{\n" + rescript_code + "\n}\n")
+        else:
+            yield check_code_generation, redux_code, ("{\n}\n")
 
 
 def check_code_generation(redux_code, rescript_code):

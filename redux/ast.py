@@ -51,6 +51,10 @@ class Block(Stmt):
     _fields = ["statements"]
 
 
+class Require(Stmt):
+    _fields = ["path"]
+
+
 class ExprStmt(Stmt):
     _fields = ["expression"]
 

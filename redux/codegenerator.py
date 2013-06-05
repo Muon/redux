@@ -9,7 +9,7 @@ from redux.stringinliner import StringInliner
 from redux.typeannotate import TypeAnnotator
 from redux.types import str_, float_, int_, object_, is_numeric
 from redux.visitor import ASTVisitor
-
+from redux.requireinliner import RequireInliner
 
 class CodeGenerator(ASTVisitor):
     """Generates code from AST."""
@@ -223,6 +223,7 @@ def compile_script(filename, code):
     for lineno, message in errors:
         sys.stderr.write("%s:%d: %s\n" % (filename, lineno, message))
 
+    ast_ = RequireInliner().visit(ast_)
     ast_ = AssignmentScopeAnalyzer().visit(ast_)
     ast_ = TypeAnnotator().visit(ast_)
     ast_ = CallInliner().visit(ast_)
