@@ -74,6 +74,12 @@ class TypeAnnotator(ASTTransformer):
 
         raise UndefinedVariableError(name)
 
+    def add_scope_entry(self, scope, var_name, expr):
+        if expr.type == str_:
+            scope[var_name] = ScopeEntry(expr.type, True, expr)
+        else:
+            scope[var_name] = ScopeEntry(expr.type, False, None)
+
     def get_variable_type(self, name):
         return self.get_scope_entry(name).type
 
@@ -141,23 +147,21 @@ class TypeAnnotator(ASTTransformer):
                 "expected %d arguments, got %d" % (len(func_def.arguments),
                                                    len(func_call.arguments)))
 
-        shadowed_vars = [Assignment(VarRef(name), value, True)
-                         for name, value
-                         in zip(func_def.arguments, func_call.arguments)]
-        new_statements = shadowed_vars + func_def.block.statements
-        func_def.block.statements = new_statements
+        for name, value in zip(func_def.arguments, func_call.arguments):
+            self.add_scope_entry(func_def.visible_scope[-1], name, value)
 
+        stmts = func_def.block.statements
         real_scopes = self.scopes
         self.scopes = func_def.visible_scope
-
         func_def.block = self.visit(func_def.block)
-
-        if new_statements and isinstance(new_statements[-1], ReturnStmt):
-            func_call.type = new_statements[-1].expression.type
+        if stmts and isinstance(stmts[-1], ReturnStmt):
+            func_call.type = stmts[-1].expression.type
         else:
             func_call.type = None
-
         self.scopes = real_scopes
+        argument_assignments = [Assignment(VarRef(name), value, True)
+            for name, value in zip(func_def.arguments, func_call.arguments)]
+        func_def.block.statements = argument_assignments + stmts
 
         func_call.func_def = func_def
         return func_call
@@ -182,11 +186,8 @@ class TypeAnnotator(ASTTransformer):
             if immutable is True:
                 raise ImmutabilityViolationError(var_name)
         except KeyError:
-            if expr_type == str_:
-                self.scopes[-1][var_name] = ScopeEntry(expr_type, True,
-                                                       assignment.expression)
-            else:
-                self.scopes[-1][var_name] = ScopeEntry(expr_type, False, None)
+            self.add_scope_entry(self.scopes[-1], var_name,
+                assignment.expression)
 
         assignment.variable = self.visit(assignment.variable)
 

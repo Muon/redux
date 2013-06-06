@@ -137,7 +137,7 @@ class CodeGenerator(ASTVisitor):
 
     def visit_Assignment(self, assignment):
         if assignment.declare is True:
-            self.emit("%s " % self.type_name(assignment.variable.type))
+            self.emit("%s " % self.type_name(assignment.expression.type))
 
         self.visit(assignment.variable)
         self.emit(" = ")
