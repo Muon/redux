@@ -92,9 +92,11 @@ class CallInliner(ASTTransformer):
             return func_call
 
         new_block = func_def.block
+        argument_assignments = [Assignment(VarRef(name), value, True)
+            for name, value in zip(func_def.arguments, func_call.arguments)]
+        new_statements = argument_assignments + new_block.statements
+        new_block.statements = new_statements
         self.visit(new_block)
-
-        new_statements = new_block.statements
 
         # If we have something like a = f(x), we have to insert the function
         # body *before* the assignment, then use a temporary return variable to

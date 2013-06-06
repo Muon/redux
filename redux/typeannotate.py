@@ -159,9 +159,6 @@ class TypeAnnotator(ASTTransformer):
         else:
             func_call.type = None
         self.scopes = real_scopes
-        argument_assignments = [Assignment(VarRef(name), value, True)
-            for name, value in zip(func_def.arguments, func_call.arguments)]
-        func_def.block.statements = argument_assignments + stmts
 
         func_call.func_def = func_def
         return func_call
