@@ -60,7 +60,7 @@ def _unary_numeric_intrinsic(name, op, type_):
             assert len(args) == 1
             assert is_numeric(args[0].type)
 
-            code_generator.emit("(" + op)
+            code_generator.emit("(" + op + " ")
             code_generator.visit(args[0])
             code_generator.emit(")")
 
@@ -90,7 +90,7 @@ class Object(IntrinsicFunction):
         assert len(args) == 1
         assert args[0].type == int_
 
-        code_generator.emit("(to_object")
+        code_generator.emit("(to_object ")
         code_generator.visit(args[0])
         code_generator.emit(")")
 
@@ -105,7 +105,7 @@ class Atan2(IntrinsicFunction):
 
         code_generator.emit("(")
         code_generator.visit(args[0])
-        code_generator.emit("atan2")
+        code_generator.emit(" atan2 ")
         code_generator.visit(args[1])
         code_generator.emit(")")
 
