@@ -3,15 +3,21 @@ from argparse import ArgumentParser
 from os.path import splitext
 
 parser = ArgumentParser(description='Compile a Redux script to Rescript.')
-parser.add_argument('filenames', metavar='FILE', nargs='+',
+parser.add_argument('input_filename', metavar='FILE',
+                    help='script to be compiled to Rescript')
+parser.add_argument('output_filename', metavar='FILE',
                     help='script to be compiled to Rescript')
 
 args = parser.parse_args()
 
-for filename in args.filenames:
-    with open(filename, "rt") as file_:
-        input_code = file_.read()
+filename = args.input_filename
+assert filename, "no input file given"
 
-    base_filename, extension = splitext(filename)
-    with open(base_filename + ".ais", "wt") as file_:
-        file_.write(compile_script(filename, input_code))
+with open(filename, "rt") as file_:
+    input_code = file_.read()
+
+output_code = compile_script(filename, input_code)
+
+base_filename, extension = splitext(filename)
+with open(args.output_filename, "wt") as file_:
+    file_.write(output_code)
