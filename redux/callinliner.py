@@ -1,6 +1,6 @@
 from redux.ast import (Block, Assignment, WhileStmt, IfStmt, BreakStmt,
-                       ReturnStmt, Constant, VarRef, Stmt, NoOp)
-from redux.types import int_
+                       ReturnStmt, Constant, VarRef, Stmt, NoOp, FunctionCall)
+from redux.types import int_, object_
 from redux.visitor import ASTTransformer, ASTVisitor
 
 
@@ -14,7 +14,12 @@ class CallInliner(ASTTransformer):
     def allocate_temporary(self, type_):
         temporary = VarRef("__retval%d" % self.return_value_counter)
         temporary.type = type_
-        self.prepend_stmt(Assignment(temporary, Constant(0, type_), True))
+        if type_ == object_:
+            expr = FunctionCall("object", [Constant(0, int_)])
+            expr.type = object_
+        else:
+            expr = Constant(0, type_)
+        self.prepend_stmt(Assignment(temporary, expr, True))
         self.return_value_counter += 1
         return temporary
 
