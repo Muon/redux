@@ -81,6 +81,11 @@ def test_code_generation():
         ("target = object(0)", "target = (to_object0);"),
         ("require \"examples/example0\"", ""),
         ("require \"examples/example0\" say(f(2))", "int __retval0 = 0;\n{\nint x = 2;\n__retval0 = (x*x);\n}\nsay __retval0;"),
+        ("if object(0) or object(0) end", "if(((to_object0)||(to_object0))){\n}"),
+        ("if object(0) and object(0) end", "if(((to_object0)&&(to_object0))){\n}"),
+        ("if object(0) == object(0) end", "if(((to_object0)==(to_object0))){\n}"),
+        ("if object(0) != object(0) end", "if(((to_object0)!=(to_object0))){\n}"),
+        ("if not object(0) end", "if((!(to_object0))){\n}"),
     ]
 
     for redux_code, rescript_code in code_examples:

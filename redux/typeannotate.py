@@ -235,6 +235,37 @@ class TypeAnnotator(ASTTransformer):
 
         return relop
 
+    def handle_equality(self, eqop):
+        eqop = self.generic_visit(eqop)
+        # You can always compare equal things of the same type (e.g. ints and
+        # ints, and objects and objects), otherwise they must both be numeric.
+        if eqop.lhs.type != eqop.rhs.type:
+            if not is_numeric(eqop.lhs.type) or not is_numeric(eqop.rhs.type):
+                raise IncompatibleTypeError(eqop)
+        eqop.type = int_
+        return eqop
+
+    def visit_EqualToOp(self, eqop):
+        return self.handle_equality(eqop)
+
+    def visit_NotEqualToOp(self, eqop):
+        return self.handle_equality(eqop)
+
+    def handle_connective(self, connective):
+        connective = self.generic_visit(connective)
+        # Logical connectives are always well-defined for all three types.
+        connective.type = int_
+        return connective
+
+    def visit_LogicalAndOp(self, land):
+        return self.handle_connective(land)
+
+    def visit_LogicalOrOp(self, lor):
+        return self.handle_connective(lor)
+
+    def visit_LogicalNotOp(self, lnot):
+        return self.handle_connective(lnot)
+
     def visit_ChronalAccess(self, chronal_access):
         chronal_access = self.generic_visit(chronal_access)
         if (chronal_access.object.type != object_ or
