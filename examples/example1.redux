@@ -1,0 +1,5 @@
+require "examples/example0"
+
+def foo()
+    return f(1)
+end

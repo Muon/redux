@@ -88,6 +88,7 @@ def test_code_generation():
         ("if not object(0) end", "if((!(to_object 0))){\n}"),
         ("def f() return object(0) end f()", "object __retval0 = (to_object 0);\n{\n__retval0 = (to_object 0);\n}\n__retval0;"),
         ("def f(a) return a end def g(a) return f(a) end g(unit)", "object __retval1 = (to_object 0);\n{\nobject a = unit;\nobject __retval0 = (to_object 0);\n{\nobject a = a;\n__retval0 = a;\n}\n__retval1 = __retval0;\n}\n__retval1;"),
+        ("require \"examples/example1\" foo()", "int __retval1 = 0;\n{\nint __retval0 = 0;\n{\nint x = 1;\n__retval0 = (x*x);\n}\n__retval1 = __retval0;\n}\n__retval1;"),
     ]
 
     for redux_code, rescript_code in code_examples:
