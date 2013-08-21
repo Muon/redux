@@ -1,5 +1,5 @@
 str_ = ("str",)
-int_ = ("int,")
+int_ = ("int",)
 float_ = ("float",)
 object_ = ("object",)
 
